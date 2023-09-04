@@ -2,17 +2,15 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gpa_calculator/Themes/theme.dart';
 import 'package:gpa_calculator/core/common/sign_in_button.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:routemaster/routemaster.dart';
 
-//TODO: refractor code alot of it is repeated
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   void navigateToRegisterPage(BuildContext context) {
-    Routemaster.of(context).replace('/signup-screen');
+    Routemaster.of(context).push('/signup-screen');
   }
 
   void signInWithEmailAndPassword(BuildContext context, WidgetRef ref,
@@ -40,7 +38,7 @@ class LoginScreen extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(25, 0, 25, 25),
                     child: AnimatedTextKit(
-                      repeatForever: true,
+                      totalRepeatCount: 1,
                       animatedTexts: [
                         TypewriterAnimatedText('Welcome to GPA Calculator',
                             textStyle: GoogleFonts.roboto(
@@ -56,8 +54,7 @@ class LoginScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
                       child: Column(
                         children: [
-                          const SizedBox(height: 10),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 25),
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text('Email',
@@ -67,18 +64,7 @@ class LoginScreen extends ConsumerWidget {
                           const SizedBox(height: 5),
                           TextFormField(
                             controller: emailTextController,
-                            decoration: InputDecoration(
-                                // floatingLabelAlignment:
-                                //     FloatingLabelAlignment.start,
-                                // label: const Text(
-                                //   "Email",
-                                //   style: TextStyle(fontSize: 18),
-                                // ),
-                                // floatingLabelBehavior:
-                                //     FloatingLabelBehavior.always,
-                                hintStyle: GoogleFonts.roboto(),
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10))),
+                            decoration: const InputDecoration(),
                           ),
                           const SizedBox(height: 10),
                           Align(
@@ -89,11 +75,16 @@ class LoginScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 5),
                           TextFormField(
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Cannot be empty';
+                              }
+                              return null;
+                            },
                             controller: passwordTextController,
-                            decoration: InputDecoration(
-                                hintStyle: GoogleFonts.roboto(),
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10))),
+                            decoration: const InputDecoration(),
                           ),
                           const SizedBox(height: 10),
                           Align(
@@ -102,10 +93,10 @@ class LoginScreen extends ConsumerWidget {
                               onTap: () {
                                 //TODO: add forgot password function
                               },
-                              child: Text(
+                              child: const Text(
                                 "Forgot password?",
-                                style: elevatedButtonTextStyle.copyWith(
-                                    fontSize: 17, color: Colors.blue),
+                                style:
+                                    TextStyle(fontSize: 17, color: Colors.blue),
                               ),
                             ),
                           ),
@@ -118,25 +109,21 @@ class LoginScreen extends ConsumerWidget {
                               passwordTextController.text,
                             ),
                             child: Text(
-                              'Log in',
-                              style: elevatedButtonTextStyle.copyWith(
-                                  color: Colors.white),
+                              'Login',
+                              style: GoogleFonts.lato(fontSize: 20),
                             ),
                           ),
                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                "Don't have an account?  ",
-                                style: elevatedButtonTextStyle.copyWith(
-                                    fontSize: 15),
-                              ),
+                              const Text("Don't have an account?  ",
+                                  style: TextStyle(fontSize: 15)),
                               GestureDetector(
                                 onTap: () => navigateToRegisterPage(context),
-                                child: Text(
+                                child: const Text(
                                   "Register Now",
-                                  style: elevatedButtonTextStyle.copyWith(
+                                  style: TextStyle(
                                       fontSize: 15,
                                       decoration: TextDecoration.underline),
                                 ),
@@ -145,9 +132,6 @@ class LoginScreen extends ConsumerWidget {
                           ),
                           const Spacer(),
                           const Row(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(child: Divider(thickness: 2)),
                               Padding(

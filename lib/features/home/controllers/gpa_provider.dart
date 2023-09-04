@@ -1,31 +1,31 @@
-import 'package:gpa_calculator/features/home/controllers/courses_provider.dart';
-import 'package:gpa_calculator/features/home/controllers/semsters_provider.dart';
-import 'package:gpa_calculator/core/common/semester_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/features/database/courses_controller.dart';
+import 'package:gpa_calculator/features/database/semsters_controller.dart';
 
-class GPANotifier extends Notifier<double> {
-  @override
-  build() {
-    return getGPA();
-  }
+final gpaStateProvider = StateProvider<List<double>>((ref) {
+  double gpa = 0;
+  double totalCredits = 0;
 
-  double getGPA() {
-    {
-      double gpa = 0;
-      double totalCredits = 0;
+  final semesterStream = ref.watch(semesterStreamProvider);
 
-      for (SemesterWidget semesterWidget
-          in ref.watch(semesterProvider).listOfWidgets) {
-        var notifier = ref.watch(courseProvider(semesterWidget.id).notifier);
-        if (notifier.getSemesterGPA() == 0) continue;
-        gpa += (notifier.getSemesterGPA() * notifier.getTotalCredit());
-        totalCredits += notifier.getTotalCredit();
+  semesterStream.whenData(
+    (semesterModelList) {
+      for (var semesterModel in semesterModelList) {
+        final courseStream =
+            ref.watch(courseControllerProvider(semesterModel.id));
+
+        gpa += (courseStream.getSemesterGPA() * courseStream.getTotalCredit());
+        totalCredits += courseStream.getTotalCredit();
       }
-      var result = double.parse((gpa / totalCredits).toStringAsPrecision(3));
-      state = result.isNaN ? 0 : result;
-      return state;
-    }
-  }
-}
+    },
+  );
 
-final gpaProvider = NotifierProvider<GPANotifier, double>(() => GPANotifier());
+  final List<double> result = [
+    (gpa / totalCredits).isNaN
+        ? 0
+        : double.parse((gpa / totalCredits).toStringAsPrecision(3)),
+    totalCredits
+  ];
+
+  return result;
+});

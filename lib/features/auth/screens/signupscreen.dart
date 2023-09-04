@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:routemaster/routemaster.dart';
-
-import '../../../Themes/theme.dart';
 import '../../../core/common/sign_in_button.dart';
 
 class SignUpScreen extends ConsumerWidget {
@@ -33,51 +31,59 @@ class SignUpScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
+              child: Text(
+                "Welcome to GPA Calculator",
+                style: GoogleFonts.roboto(fontSize: 25.0, color: Colors.black),
+              ),
+            ),
             Image.asset('assets/images/signupscreenphoto.png'),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
                 child: Column(
                   children: [
+                    const SizedBox(height: 10),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Welcome to GPA Calculator",
-                        style: elevatedButtonTextStyle.copyWith(
-                            fontWeight: FontWeight.bold),
-                      ),
+                      child: Text('User',
+                          style: GoogleFonts.roboto(
+                              fontSize: 15, color: Colors.black)),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextFormField(
                       controller: userNameTextController,
-                      decoration: InputDecoration(
-                          hintText: "Enter your name",
-                          hintStyle: GoogleFonts.roboto(),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20))),
+                      decoration: const InputDecoration(),
                     ),
                     const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Email',
+                          style: GoogleFonts.roboto(
+                              fontSize: 15, color: Colors.black)),
+                    ),
+                    const SizedBox(height: 5),
                     TextFormField(
                       controller: emailTextController,
-                      decoration: InputDecoration(
-                          hintText: "Enter your email",
-                          hintStyle: GoogleFonts.roboto(),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20))),
+                      decoration: const InputDecoration(),
                     ),
                     const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Password',
+                          style: GoogleFonts.roboto(
+                              fontSize: 15, color: Colors.black)),
+                    ),
+                    const SizedBox(height: 5),
                     TextFormField(
                       obscureText: true,
                       enableSuggestions: false,
                       autocorrect: false,
                       controller: passwordTextController,
-                      decoration: InputDecoration(
-                          hintText: "Enter your password",
-                          hintStyle: GoogleFonts.roboto(),
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20))),
+                      decoration: const InputDecoration(),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 15),
                     ElevatedButton(
                       onPressed: () => signUpWithEmailAndPassword(
                           context,
@@ -87,23 +93,22 @@ class SignUpScreen extends ConsumerWidget {
                           passwordTextController.text),
                       child: Text(
                         'Sign up',
-                        style: elevatedButtonTextStyle.copyWith(
-                            color: Colors.white),
+                        style: GoogleFonts.lato(fontSize: 20),
                       ),
                     ),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           "Already have an account?  ",
-                          style: elevatedButtonTextStyle.copyWith(fontSize: 15),
+                          style: TextStyle(fontSize: 15),
                         ),
                         GestureDetector(
                           onTap: () => navigateToLoginPage(context),
-                          child: Text(
+                          child: const Text(
                             "Login",
-                            style: elevatedButtonTextStyle.copyWith(
+                            style: TextStyle(
                                 fontSize: 15,
                                 decoration: TextDecoration.underline),
                           ),
@@ -130,7 +135,7 @@ class SignUpScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
