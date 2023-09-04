@@ -12,24 +12,25 @@ class ProfileDrawer extends ConsumerWidget {
     final user = ref.watch(userProvider);
     return Drawer(
       child: SafeArea(
-          child: Column(
-        children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(user!.profilePic == ''
-                ? Constants.avatarDefault
-                : user.profilePic),
-            radius: 70,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(200, 50),
-              ),
-              onPressed: () =>
-                  ref.watch(authControllerProvider.notifier).logout(),
-              child: const Text("Log out")),
-        ],
-      )),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 70,
+              backgroundImage: NetworkImage(user!.profilePic == ''
+                  ? Constants.avatarDefault
+                  : user.profilePic.replaceAll("s96-c", "s250-c")),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(200, 50),
+                ),
+                onPressed: () =>
+                    ref.watch(authControllerProvider.notifier).logout(),
+                child: const Text("Log out")),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -18,7 +18,7 @@ final gradeNumber = <String, double>{
 class GPADropdown extends StatefulWidget {
   final String selectedValue;
   final Function(String grade) updateGrade;
-  final int id;
+  final String id;
   const GPADropdown(
       {required this.selectedValue,
       super.key,
@@ -57,7 +57,7 @@ class GPADropdownState extends State<GPADropdown> {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
-      // decoration: const InputDecoration(),
+      decoration: const InputDecoration(),
       value: selectedGPA,
       onChanged: (newValue) {
         setState(() {

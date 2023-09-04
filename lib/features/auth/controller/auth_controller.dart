@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/models/user_model.dart';
-
 import '../../../core/utils.dart';
 
 final userProvider = StateProvider<UserModel?>((ref) => null);
