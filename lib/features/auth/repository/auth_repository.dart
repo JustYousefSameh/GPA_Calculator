@@ -4,30 +4,34 @@ import 'package:fpdart/fpdart.dart';
 import 'package:gpa_calculator/core/failure.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 import '../../../core/type_defs.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
-    firestore: ref.read(firestoreProvider),
-    auth: ref.read(authProvider),
-    googleSignIn: ref.read(googleSignInProvider),
-  ),
+      firestore: ref.read(firestoreProvider),
+      auth: ref.read(authProvider),
+      googleSignIn: ref.read(googleSignInProvider),
+      semesterRepository: ref.read(semestersRepositoryProvider)),
 );
 
 class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+  final SemesterRepository _semesterRepository;
 
-  AuthRepository({
-    required FirebaseFirestore firestore,
-    required FirebaseAuth auth,
-    required GoogleSignIn googleSignIn,
-  })  : _auth = auth,
+  AuthRepository(
+      {required FirebaseFirestore firestore,
+      required FirebaseAuth auth,
+      required GoogleSignIn googleSignIn,
+      required SemesterRepository semesterRepository})
+      : _auth = auth,
         _firestore = firestore,
-        _googleSignIn = googleSignIn;
+        _googleSignIn = googleSignIn,
+        _semesterRepository = semesterRepository;
 
   CollectionReference get _users => _firestore.collection('users');
 
@@ -47,6 +51,7 @@ class AuthRepository {
           isAuthenticated: true,
           profilePic: userCredential.user!.photoURL ?? '');
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
+      await _semesterRepository.addSemesterUsingID(userCredential.user!.uid);
 
       return right(userModel);
     } on FirebaseAuthException catch (e) {
@@ -102,6 +107,7 @@ class AuthRepository {
             isAuthenticated: true,
             profilePic: userCredential.user!.photoURL ?? '');
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
+        await _semesterRepository.addSemesterUsingID(userCredential.user!.uid);
       } else {
         userModel = await getUserData(userCredential.user!.uid).first;
       }

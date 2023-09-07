@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/features/database/courses_controller.dart';
-import 'package:gpa_calculator/features/database/semsters_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/courses_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
 
 final gpaStateProvider = StateProvider<List<double>>((ref) {
   double gpa = 0;

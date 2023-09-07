@@ -1,87 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gpa_calculator/core/common/semester_widgets.dart';
+import 'package:gpa_calculator/core/common/loader.dart';
+import 'package:gpa_calculator/features/semesters/widgets/semester_widgets.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
-import 'package:gpa_calculator/features/database/semsters_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/features/home/drawers/profile_drawer.dart';
-import '../../../Themes/theme.dart';
+import '../../../core/theme.dart';
 import '../controllers/gpa_provider.dart';
 
-class AppMainScreen extends ConsumerWidget {
-  const AppMainScreen({
-    super.key,
-  });
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late Image profileImage;
+
+  @override
+  void initState() {
+    final imageUrl = ref.read(userProvider)?.profilePic;
+    if (imageUrl != null && imageUrl != '') {
+      profileImage = Image.network(imageUrl);
+    } else {
+      profileImage = Image.asset(Constants.avatarDefault);
+    }
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    final imageUrl = ref.read(userProvider)?.profilePic;
+
+    if (imageUrl != null && imageUrl != '') {
+      precacheImage(profileImage.image, context);
+    }
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(userProvider);
 
     void displayEndDrawer(BuildContext context) {
       Scaffold.of(context).openEndDrawer();
     }
 
-    return Scaffold(
-      // resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('assets/icons/GPA_NoText.png', width: 50),
-            Text(
-              "GPA Calculator",
-              style: GoogleFonts.rubik(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: secondary300,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Builder(
-            builder: (context) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: IconButton(
-                  onPressed: () => displayEndDrawer(context),
-                  icon: CircleAvatar(
-                    backgroundImage: NetworkImage(user!.profilePic == ''
-                        ? Constants.avatarDefault
-                        : user.profilePic),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      endDrawer: const ProfileDrawer(),
-      endDrawerEnableOpenDragGesture: false,
-      body: GestureDetector(
-        onTap: () {
-          print('asdsa');
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
-        child: const Column(
-          children: [
-            Expanded(
-              child: Stack(
+    return user == null
+        ? const Scaffold()
+        : Scaffold(
+            appBar: AppBar(
+              title: Row(
                 children: [
-                  SemesterListView(),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: AddSemesterButton(),
-                  )
+                  Image.asset('assets/icons/GPA_NoText.png', width: 50),
+                  Text(
+                    "GPA Calculator",
+                    style: GoogleFonts.rubik(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: secondary300,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                Builder(
+                  builder: (context) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 5),
+                      child: IconButton(
+                          onPressed: () => displayEndDrawer(context),
+                          icon: ClipOval(child: Image.network(user.profilePic))
+                          // CircleAvatar(
+                          //   backgroundImage: NetworkImage(user!.profilePic == ''
+                          //       ? Constants.avatarDefault
+                          //       : user.profilePic,
+                          //       ),
+                          // ),
+                          ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            endDrawer: ProfileDrawer(drawerImage: profileImage),
+            endDrawerEnableOpenDragGesture: false,
+            body: GestureDetector(
+              onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: const Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        SemesterListView(),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: AddSemesterButton(),
+                        )
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  CumlativeGPA()
                 ],
               ),
             ),
-            Divider(),
-            CumlativeGPA()
-          ],
-        ),
-      ),
-    );
+          );
   }
 }
 
@@ -146,11 +176,7 @@ class SemesterListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final semesters = ref.watch(semesterStreamProvider);
     return semesters.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(
-          color: Colors.red,
-        ),
-      ),
+      loading: () => const Center(child: Loader()),
       error: (error, stackTrace) => Text(error.toString()),
       data: (semesterData) {
         return ListView.builder(
@@ -159,7 +185,6 @@ class SemesterListView extends ConsumerWidget {
           itemCount: semesterData.length,
           itemBuilder: (context, index) {
             return Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 SemesterWidget(
                   index: index,
@@ -191,7 +216,15 @@ class AddSemesterButton extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50), color: secondary300),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.grey, //New
+                  blurRadius: 5.0,
+                  offset: Offset(0, 3))
+            ],
+            borderRadius: BorderRadius.circular(50),
+            color: secondary300,
+          ),
           child: const Icon(
             Icons.add,
             size: 33,
@@ -199,13 +232,7 @@ class AddSemesterButton extends ConsumerWidget {
           ),
         ),
       ),
-      onTap: () {
-        try {
-          ref.read(semesterControllerProvider).addSemester();
-        } on Exception catch (e) {
-          print(e);
-        }
-      },
+      onTap: () => ref.read(semesterControllerProvider).addSemester(),
     );
   }
 }

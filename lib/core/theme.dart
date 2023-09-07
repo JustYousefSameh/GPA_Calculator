@@ -44,7 +44,7 @@ ThemeData customTheme = ThemeData(
           minimumSize:
               MaterialStateProperty.all(const Size(double.infinity, 50)))),
   appBarTheme: const AppBarTheme(
-    foregroundColor: primary100,
+    foregroundColor: Colors.black,
     backgroundColor: primary100,
     elevation: 0,
   ),

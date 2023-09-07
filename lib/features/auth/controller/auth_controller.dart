@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
@@ -5,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 import '../../../core/utils.dart';
 
-final userProvider = StateProvider<UserModel?>((ref) => null);
+final userProvider = StateProvider<UserModel?>((ref) {
+  return null;
+});
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
@@ -19,7 +23,7 @@ final authStateChangeProvider = StreamProvider((ref) {
 });
 
 final getUserDataProvider = StreamProvider.family((ref, String uid) {
-  final authController = ref.watch(authControllerProvider.notifier);
+  final authController = ref.read(authControllerProvider.notifier);
   return authController.getUserData(uid);
 });
 
