@@ -1,5 +1,5 @@
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
-import 'package:gpa_calculator/features/database/semesters_repositroy.dart';
+import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +9,7 @@ final semesterStreamProvider =
   final semestersSnapshot = ref
       .read(firestoreProvider)
       .collection('users')
-      .doc(ref.read(userProvider)!.uid)
+      .doc(ref.watch(userProvider)!.uid)
       .collection('semesters')
       .orderBy('timestamp', descending: false)
       .snapshots();
