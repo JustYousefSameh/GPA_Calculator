@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gpa_calculator/core/theme.dart';
-import 'package:gpa_calculator/features/semesters/widgets/semester_widgets.dart';
 import 'package:gpa_calculator/features/semesters/controller/courses_controller.dart';
+import 'package:gpa_calculator/features/semesters/widgets/semester_widgets.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
 class CourseList extends ConsumerWidget {
+  const CourseList({required this.semesterId, super.key, this.listOfCourses});
   final List<CourseModel>? listOfCourses;
   final String semesterId;
-  const CourseList({super.key, this.listOfCourses, required this.semesterId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,10 +48,8 @@ class CourseList extends ConsumerWidget {
       child: OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
           side: const BorderSide(width: 0.7),
-          shape: const StadiumBorder(
-            side: BorderSide.none,
-          ),
-          padding: const EdgeInsets.all(0),
+          shape: const StadiumBorder(),
+          padding: EdgeInsets.zero,
         ),
         onPressed: () {
           final couseModel = CourseModel.empty();
@@ -62,17 +60,24 @@ class CourseList extends ConsumerWidget {
           color: secondary300,
         ),
         label: Text(
-          "Add Course",
+          'Add Course',
           style: GoogleFonts.rubik(
-              fontSize: 18, color: secondary300, fontWeight: FontWeight.bold),
+            fontSize: 18,
+            color: secondary300,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(CourseModel courseModel, int index, BuildContext context,
-      Animation<double> animation) {
+  Widget _buildItem(
+    CourseModel courseModel,
+    int index,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return CourseWidget(
       index: index,
       courseModel: courseModel,
@@ -81,8 +86,12 @@ class CourseList extends ConsumerWidget {
     );
   }
 
-  Widget _buildRemovedItem(CourseModel item, int index, BuildContext context,
-      Animation<double> animation) {
+  Widget _buildRemovedItem(
+    CourseModel item,
+    int index,
+    BuildContext context,
+    Animation<double> animation,
+  ) {
     return CourseWidget(
       courseModel: item,
       semesterId: semesterId,
@@ -94,8 +103,8 @@ class CourseList extends ConsumerWidget {
 
 class SemesterGPA extends ConsumerWidget {
   const SemesterGPA({
-    super.key,
     required this.semesterId,
+    super.key,
   });
 
   final String semesterId;
@@ -109,7 +118,7 @@ class SemesterGPA extends ConsumerWidget {
       height: 40,
       child: Center(
         child: Text(
-          "GPA : ${controller.getSemesterGPA()}",
+          'GPA : ${controller.getSemesterGPA()}',
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
@@ -122,4 +131,7 @@ class SemesterGPA extends ConsumerWidget {
 }
 
 typedef RemovedItemBuilder<T> = Widget Function(
-    T item, BuildContext context, Animation<double> animation);
+  T item,
+  BuildContext context,
+  Animation<double> animation,
+);

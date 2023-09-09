@@ -2,13 +2,21 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/core/utils.dart';
+import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:gpa_calculator/models/user_model.dart';
-import '../../../core/utils.dart';
 
 final userProvider = StateProvider<UserModel?>((ref) {
-  return null;
+  final user = ref.watch(authStateChangeProvider).asData?.value;
+  return user == null
+      ? null
+      : UserModel(
+          name: user.displayName!,
+          uid: user.uid,
+          isAuthenticated: true,
+          profilePic: user.photoURL ?? '',
+        );
 });
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
@@ -28,53 +36,68 @@ final getUserDataProvider = StreamProvider.family((ref, String uid) {
 });
 
 class AuthController extends StateNotifier<bool> {
-  final AuthRepository _authRepository;
-  final Ref _ref;
   AuthController({required AuthRepository authRepository, required Ref ref})
       : _authRepository = authRepository,
         _ref = ref,
         super(false);
+  final AuthRepository _authRepository;
+  final Ref _ref;
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
-  void signInWithGoogle(BuildContext context) async {
+  Future<void> signInWithGoogle(BuildContext context) async {
     state = true;
     final user = await _authRepository.signInWithGoogle();
     state = false;
     user.fold(
-        (l) => showSnackBar(context, l.message),
-        (userModel) =>
-            _ref.read(userProvider.notifier).update((state) => userModel));
+      (l) => showSnackBar(context, l.message),
+      (userModel) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
   }
 
-  void signUpWithEmailAndPassword(BuildContext context, String userName,
-      String emailAddress, String password) async {
+  Future<void> signUpWithEmailAndPassword(
+    BuildContext context,
+    String userName,
+    String emailAddress,
+    String password,
+  ) async {
     state = true;
     final user = await _authRepository.signUpWithEmailAndPassword(
-        userName, emailAddress, password);
+      userName,
+      emailAddress,
+      password,
+    );
     state = false;
     user.fold(
-        (l) => showSnackBar(context, l.message),
-        (r) => (userModel) =>
-            _ref.read(userProvider.notifier).update((state) => userModel));
+      (l) => showSnackBar(context, l.message),
+      (r) => (UserModel userModel) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
   }
 
-  void singInWithEmailAndPassowrd(
-      BuildContext context, String emailAddress, String password) async {
+  Future<void> singInWithEmailAndPassowrd(
+    BuildContext context,
+    String emailAddress,
+    String password,
+  ) async {
     state = true;
     final user = await _authRepository.signInWithEmailAndPassword(
-        emailAddress, password);
+      emailAddress,
+      password,
+    );
     state = false;
     user.fold(
-        (l) => showSnackBar(context, l.message),
-        (r) => (userModel) =>
-            _ref.read(userProvider.notifier).update((state) => userModel));
+      (l) => showSnackBar(context, l.message),
+      (r) => (UserModel userModel) =>
+          _ref.read(userProvider.notifier).update((state) => userModel),
+    );
   }
 
   Stream<UserModel> getUserData(String uid) {
     return _authRepository.getUserData(uid);
   }
 
-  void logout() async {
-    _authRepository.logOut();
+  Future<void> logout() async {
+    await _authRepository.logOut();
   }
 }

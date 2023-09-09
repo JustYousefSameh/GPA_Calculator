@@ -1,19 +1,21 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+@immutable
 class SemsesterModel {
   final String id;
+
+  const SemsesterModel({
+    required this.id,
+  });
 
   factory SemsesterModel.empty() => SemsesterModel(
         id: const Uuid().v1(),
       );
-
-  SemsesterModel({
-    required this.id,
-  });
 
   SemsesterModel copyWith({
     String? id,
@@ -62,19 +64,19 @@ class CourseModel {
   final int credits;
   final String id;
 
-  factory CourseModel.empty() => CourseModel(
-        courseName: '',
-        grade: 'A+',
-        credits: 0,
-        id: const Uuid().v1(),
-      );
-
   CourseModel({
     required this.courseName,
     required this.grade,
     required this.credits,
     required this.id,
   });
+
+  factory CourseModel.empty() => CourseModel(
+        courseName: '',
+        grade: 'A+',
+        credits: 0,
+        id: const Uuid().v1(),
+      );
 
   CourseModel copyWith({
     String? courseName,

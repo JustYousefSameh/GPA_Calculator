@@ -22,23 +22,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void initState() {
-    final imageUrl = ref.read(userProvider)?.profilePic;
-    if (imageUrl != null && imageUrl != '') {
-      profileImage = Image.network(imageUrl);
-    } else {
-      profileImage = Image.asset(Constants.avatarDefault);
-    }
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    final imageUrl = ref.read(userProvider)?.profilePic;
-
-    if (imageUrl != null && imageUrl != '') {
-      precacheImage(profileImage.image, context);
-    }
-
+    // final imageUrl =
+    //     ref.read(userProvider)!.profilePic.replaceAll("s96-c", "s250-c");
+    // profileImage = Image.network(imageUrl);
+    // precacheImage(profileImage.image, context);
     super.didChangeDependencies();
   }
 
@@ -50,68 +42,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       Scaffold.of(context).openEndDrawer();
     }
 
-    return user == null
-        ? const Scaffold()
-        : Scaffold(
-            appBar: AppBar(
-              title: Row(
-                children: [
-                  Image.asset('assets/icons/GPA_NoText.png', width: 50),
-                  Text(
-                    "GPA Calculator",
-                    style: GoogleFonts.rubik(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: secondary300,
-                    ),
-                  ),
-                ],
+    if (user != null) {
+      final imageUrl = user.profilePic.replaceAll("s96-c", "s250-c");
+      profileImage = Image.network(imageUrl);
+      precacheImage(profileImage.image, context);
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Image.asset('assets/icons/GPA_NoText.png', width: 50),
+            Text(
+              "GPA Calculator",
+              style: GoogleFonts.rubik(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: secondary300,
               ),
-              actions: [
-                Builder(
-                  builder: (context) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 5),
-                      child: IconButton(
-                          onPressed: () => displayEndDrawer(context),
-                          icon: ClipOval(child: Image.network(user.profilePic))
-                          // CircleAvatar(
-                          //   backgroundImage: NetworkImage(user!.profilePic == ''
-                          //       ? Constants.avatarDefault
-                          //       : user.profilePic,
-                          //       ),
-                          // ),
-                          ),
-                    );
-                  },
-                ),
-              ],
             ),
-            endDrawer: ProfileDrawer(drawerImage: profileImage),
-            endDrawerEnableOpenDragGesture: false,
-            body: GestureDetector(
-              onTap: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-              child: const Column(
+          ],
+        ),
+        actions: [
+          Builder(
+            builder: (context) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: IconButton(
+                    onPressed: () => displayEndDrawer(context),
+                    icon: ClipOval(
+                        child: user!.profilePic == ''
+                            ? Image.asset(Constants.defaultAvatarPath)
+                            : Image.network(user.profilePic))),
+              );
+            },
+          ),
+        ],
+      ),
+      endDrawer: const ProfileDrawer(),
+      endDrawerEnableOpenDragGesture: false,
+      body: GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: const Column(
+          children: [
+            Expanded(
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        SemesterListView(),
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: AddSemesterButton(),
-                        )
-                      ],
-                    ),
-                  ),
-                  Divider(),
-                  CumlativeGPA()
+                  SemesterListView(),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: AddSemesterButton(),
+                  )
                 ],
               ),
             ),
-          );
+            Divider(),
+            CumlativeGPA()
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -219,7 +211,7 @@ class AddSemesterButton extends ConsumerWidget {
             boxShadow: const [
               BoxShadow(
                   color: Colors.grey, //New
-                  blurRadius: 5.0,
+                  blurRadius: 5,
                   offset: Offset(0, 3))
             ],
             borderRadius: BorderRadius.circular(50),
