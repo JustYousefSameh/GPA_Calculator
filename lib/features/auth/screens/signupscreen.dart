@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gpa_calculator/core/common/sign_in_button.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
-import 'package:routemaster/routemaster.dart';
-import '../../../core/common/sign_in_button.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -14,26 +13,32 @@ class SignUpScreen extends ConsumerStatefulWidget {
 }
 
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
-  var validationMode = AutovalidateMode.disabled;
+  AutovalidateMode validationMode = AutovalidateMode.disabled;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final userNameTextController = TextEditingController();
+  final emailTextController = TextEditingController();
+  final passwordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authControllerProvider);
+
     void navigateToLoginPage(BuildContext context) {
       context.go('/login');
     }
 
-    void signUpWithEmailAndPassword(BuildContext context, WidgetRef ref,
-        String userName, String email, String passowrd) {
+    void signUpWithEmailAndPassword(
+      BuildContext context,
+      WidgetRef ref,
+      String userName,
+      String email,
+      String passowrd,
+    ) {
       ref
           .read(authControllerProvider.notifier)
           .signUpWithEmailAndPassword(context, userName, email, passowrd);
-      Routemaster.of(context).replace('/');
     }
-
-    final userNameTextController = TextEditingController();
-    final emailTextController = TextEditingController();
-    final passwordTextController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -54,19 +59,19 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 children: [
                   const SizedBox(height: 40),
                   Text(
-                    "Register Account",
+                    'Register Account',
                     style: GoogleFonts.roboto(
-                      fontSize: 34.0,
+                      fontSize: 34,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "Complete your details or sign up \nwith google",
+                    'Complete your details or continue \nwith google',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.roboto(
-                      fontSize: 20.0,
+                      fontSize: 20,
                       color: Colors.black,
                     ),
                   ),
@@ -91,6 +96,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     },
                     controller: userNameTextController,
                     decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                       suffixIcon: Icon(Icons.perm_identity),
                       suffixIconColor: Colors.black54,
                     ),
@@ -121,6 +127,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     },
                     controller: emailTextController,
                     decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                       suffixIcon: Icon(Icons.email_outlined),
                       suffixIconColor: Colors.black54,
                     ),
@@ -153,24 +160,29 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     autocorrect: false,
                     controller: passwordTextController,
                     decoration: const InputDecoration(
-                        suffixIcon: Icon(Icons.lock),
-                        suffixIconColor: Colors.black54),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      suffixIcon: Icon(Icons.lock),
+                      suffixIconColor: Colors.black54,
+                    ),
                   ),
                   const SizedBox(height: 50),
                   ElevatedButton(
                     onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+
                       if (_formKey.currentState!.validate()) {
                         signUpWithEmailAndPassword(
-                            context,
-                            ref,
-                            userNameTextController.text,
-                            emailTextController.text,
-                            passwordTextController.text);
+                          context,
+                          ref,
+                          userNameTextController.text,
+                          emailTextController.text,
+                          passwordTextController.text,
+                        );
+                      } else {
+                        setState(() {
+                          validationMode = AutovalidateMode.always;
+                        });
                       }
-
-                      setState(() {
-                        validationMode = AutovalidateMode.always;
-                      });
                     },
                     child: Text(
                       'Sign up',
@@ -182,30 +194,32 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Already have an account?  ",
+                        'Already have an account?  ',
                         style: TextStyle(fontSize: 15),
                       ),
                       GestureDetector(
                         onTap: () => navigateToLoginPage(context),
                         child: const Text(
-                          "Login",
+                          'Login',
                           style: TextStyle(
-                              fontSize: 15,
-                              decoration: TextDecoration.underline),
+                            fontSize: 15,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  if (isLoading) const LinearProgressIndicator(),
                   const Spacer(),
                   const Row(
-                    mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(child: Divider(thickness: 2)),
                       Padding(
                         padding: EdgeInsets.only(left: 10, right: 10),
-                        child: Text("Or", style: TextStyle(fontSize: 18)),
+                        child: Text('Or', style: TextStyle(fontSize: 18)),
                       ),
                       Expanded(child: Divider(thickness: 2)),
                     ],

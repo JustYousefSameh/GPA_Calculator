@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
 
 final gradeNumber = <String, double>{
-  "A+": 4,
-  "A": 4,
-  "A-": 3.7,
-  "B+": 3.3,
-  "B": 3,
-  "B-": 2.7,
-  "C+": 2.3,
-  "C": 2,
-  "C-": 1.7,
-  "D+": 1.3,
-  "D": 1,
-  "F": 0,
+  'A+': 4,
+  'A': 4,
+  'A-': 3.7,
+  'B+': 3.3,
+  'B': 3,
+  'B-': 2.7,
+  'C+': 2.3,
+  'C': 2,
+  'C-': 1.7,
+  'D+': 1.3,
+  'D': 1,
+  'F': 0,
 };
 
 class GPADropdown extends StatefulWidget {
+  const GPADropdown({
+    required this.selectedValue,
+    required this.id,
+    required this.updateGrade,
+    super.key,
+  });
   final String selectedValue;
   final Function(String grade) updateGrade;
   final String id;
-  const GPADropdown(
-      {required this.selectedValue,
-      super.key,
-      required this.id,
-      required this.updateGrade});
   @override
   GPADropdownState createState() => GPADropdownState();
 }
@@ -37,7 +38,7 @@ class GPADropdownState extends State<GPADropdown> {
     });
   }
 
-  late String? selectedGPA = "A+";
+  late String? selectedGPA = 'A+';
 
   List<String> gpaValues = [
     'A+',

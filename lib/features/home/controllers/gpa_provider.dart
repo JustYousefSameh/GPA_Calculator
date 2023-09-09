@@ -10,20 +10,21 @@ final gpaStateProvider = StateProvider<List<double>>((ref) {
 
   semesterStream.whenData(
     (semesterModelList) {
-      for (var semesterModel in semesterModelList) {
+      for (final semesterModel in semesterModelList) {
         final courseStream =
             ref.watch(courseControllerProvider(semesterModel.id));
 
-        gpa += (courseStream.getSemesterGPA() * courseStream.getTotalCredit());
+        gpa += courseStream.getSemesterGPA() * courseStream.getTotalCredit();
         totalCredits += courseStream.getTotalCredit();
       }
     },
   );
 
-  final List<double> result = [
-    (gpa / totalCredits).isNaN
-        ? 0
-        : double.parse((gpa / totalCredits).toStringAsPrecision(3)),
+  final result = <double>[
+    if ((gpa / totalCredits).isNaN)
+      0
+    else
+      double.parse((gpa / totalCredits).toStringAsPrecision(3)),
     totalCredits
   ];
 

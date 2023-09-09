@@ -2,21 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const primary100 = Colors.white;
-
-// const primary100 = Color(0xFFEAEFFC);
 const primary200 = Color(0xFF4A9292);
-// const primary300 = Color(0xFF046865);250, 225, 223
-// const primary300 = Color.fromRGBO(250, 225, 223, 1);
 const primary300 = Color(0xFF003566);
-// const secondary300 = Color(0xFF03045E);
-const secondary300 = Color(0xFF001D3D); //the darker one
-
-class TopBottomInputBorder extends UnderlineInputBorder {
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.only(bottom: borderSide.width, top: borderSide.width);
-  }
-}
+const secondary300 = Color(0xFF001D3D);
 
 ThemeData customTheme = ThemeData(
   scaffoldBackgroundColor: primary100,
@@ -38,11 +26,13 @@ ThemeData customTheme = ThemeData(
     ),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-          shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          minimumSize:
-              MaterialStateProperty.all(const Size(double.infinity, 50)))),
+    style: ButtonStyle(
+      shape: MaterialStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      minimumSize: MaterialStateProperty.all(const Size(double.infinity, 50)),
+    ),
+  ),
   appBarTheme: const AppBarTheme(
     foregroundColor: Colors.black,
     backgroundColor: primary100,

@@ -5,16 +5,16 @@ import 'package:gpa_calculator/features/semesters/controller/courses_controller.
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
-final semestersRepositoryProvider = Provider<SemesterRepository>((ref) =>
-    SemesterRepository(firestore: ref.read(firestoreProvider), ref: ref));
+final semestersRepositoryProvider = Provider<SemesterRepository>(
+  (ref) => SemesterRepository(firestore: ref.read(firestoreProvider), ref: ref),
+);
 
 class SemesterRepository {
-  final FirebaseFirestore _firestore;
-  final Ref _ref;
-
   SemesterRepository({required FirebaseFirestore firestore, required Ref ref})
       : _firestore = firestore,
         _ref = ref;
+  final FirebaseFirestore _firestore;
+  final Ref _ref;
 
   CollectionReference get _semesters => _firestore
       .collection('users')
@@ -31,7 +31,7 @@ class SemesterRepository {
         .doc(data.id);
 
     final dataToAdd = <String, dynamic>{
-      "timestamp": FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(),
       'id': data.id
     };
 
@@ -48,15 +48,15 @@ class SemesterRepository {
         .addCourse(data.id, CourseModel.empty());
   }
 
-  addSemester(SemsesterModel data) {
+  Future<void> addSemester(SemsesterModel data) async {
     final doc = _semesters.doc(data.id);
 
     final dataToAdd = <String, dynamic>{
-      "timestamp": FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(),
       'id': data.id
     };
 
-    doc.set(dataToAdd);
+    await doc.set(dataToAdd);
 
     _ref
         .read(courseControllerProvider(data.id))
@@ -69,7 +69,7 @@ class SemesterRepository {
         .addCourse(data.id, CourseModel.empty());
   }
 
-  deleteSemester(String id) {
-    _semesters.doc(id).delete();
+  Future<void> deleteSemester(String id) async {
+    await _semesters.doc(id).delete();
   }
 }
