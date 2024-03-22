@@ -79,8 +79,8 @@ class AuthRepository {
         email: emailAddress,
         password: password,
       );
-
       final userModel = await getUserData(userCredential.user!.uid).first;
+
       return right(userModel);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -113,7 +113,8 @@ class AuthRepository {
       UserModel userModel;
 
       final userCredential = await _auth.signInWithCredential(credential);
-      if (userCredential.additionalUserInfo!.isNewUser) {
+      final userDoc = await _users.doc(userCredential.user!.uid).get();
+      if (userCredential.additionalUserInfo!.isNewUser || !userDoc.exists) {
         userModel = UserModel(
           name: userCredential.user!.displayName ?? 'No Name',
           uid: userCredential.user!.uid,

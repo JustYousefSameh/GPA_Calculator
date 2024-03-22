@@ -1,47 +1,109 @@
-import 'package:animated_stream_list_nullsafety/animated_stream_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gpa_calculator/core/theme.dart';
-import 'package:gpa_calculator/features/semesters/controller/courses_controller.dart';
-import 'package:gpa_calculator/features/semesters/widgets/semester_widgets.dart';
+import 'package:gpa_calculator/features/home/controllers/gpa_provider.dart';
+import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
+import 'course_widget.dart';
+
 class CourseList extends ConsumerWidget {
-  const CourseList({required this.semesterId, super.key, this.listOfCourses});
-  final List<CourseModel>? listOfCourses;
+  CourseList({
+    super.key,
+    required this.semsesterModel,
+    required this.semesterIndex,
+  }) : semesterId = semsesterModel.id;
+
+  final SemsesterModel semsesterModel;
+  final int semesterIndex;
   final String semesterId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(courseControllerProvider(semesterId));
-    // ignore: deprecated_member_use
-    final stream = ref.read(coursesStreamProvider(semesterId).stream);
-
     return Column(
       children: [
-        AnimatedStreamList(
-          initialList: listOfCourses,
-          scrollPhysics: const NeverScrollableScrollPhysics(),
+        ListView(
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          streamList: stream,
-          itemBuilder: _buildItem,
-          itemRemovedBuilder: _buildRemovedItem,
+          children: semsesterModel.courses
+              .mapWithIndex(
+                (e, index) => CourseWidget(
+                  semsesterModel: semsesterModel,
+                  semesterIndex: semesterIndex,
+                  courseIndex: index,
+                ),
+              )
+              .toList(),
         ),
+        // AnimatedList(
+        //   initialList: semsesterModel.courses,
+        //   scrollPhysics: const NeverScrollableScrollPhysics(),
+        //   shrinkWrap: true,
+        //   streamList: stream,
+        //   itemBuilder: _buildItem,
+        //   itemRemovedBuilder: _buildRemovedItem,
+        // ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SemesterGPA(
-              semesterId: semesterId,
+              semsesterModel: semsesterModel,
             ),
-            addCourseButton(controller),
+            AddCourseButton(
+              semsesterModel: semsesterModel,
+              semesterIndex: semesterIndex,
+            ),
           ],
         ),
       ],
     );
   }
 
-  SizedBox addCourseButton(CourseController controller) {
+  // // Used to build list items that haven't been removed.
+  // Widget _buildItem(
+  //   CourseModel courseModel,
+  //   int index,
+  //   BuildContext context,
+  //   Animation<double> animation,
+  // ) {
+  //   return CourseWidget(
+  //     index: index,
+  //     courseModel: courseModel,
+  //     semesterId: semesterId,
+  //     animation: animation,
+  //   );
+  // }
+
+  // Widget _buildRemovedItem(
+  //   CourseModel item,
+  //   int index,
+  //   BuildContext context,
+  //   Animation<double> animation,
+  // ) {
+  //   return CourseWidget(
+  //     courseModel: item,
+  //     semesterId: semesterId,
+  //     index: 0,
+  //     animation: animation,
+  //   );
+  // }
+}
+
+class AddCourseButton extends ConsumerWidget {
+  const AddCourseButton({
+    super.key,
+    required this.semsesterModel,
+    required this.semesterIndex,
+  });
+
+  final SemsesterModel semsesterModel;
+  final int semesterIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(semesterControllerProvider.notifier);
     return SizedBox(
       width: 150,
       height: 40,
@@ -51,10 +113,7 @@ class CourseList extends ConsumerWidget {
           shape: const StadiumBorder(),
           padding: EdgeInsets.zero,
         ),
-        onPressed: () {
-          final couseModel = CourseModel.empty();
-          controller.addCourse(semesterId, couseModel);
-        },
+        onPressed: () => controller.addCourse(semesterIndex),
         icon: const Icon(
           Icons.add,
           color: secondary300,
@@ -70,55 +129,31 @@ class CourseList extends ConsumerWidget {
       ),
     );
   }
-
-  // Used to build list items that haven't been removed.
-  Widget _buildItem(
-    CourseModel courseModel,
-    int index,
-    BuildContext context,
-    Animation<double> animation,
-  ) {
-    return CourseWidget(
-      index: index,
-      courseModel: courseModel,
-      semesterId: semesterId,
-      animation: animation,
-    );
-  }
-
-  Widget _buildRemovedItem(
-    CourseModel item,
-    int index,
-    BuildContext context,
-    Animation<double> animation,
-  ) {
-    return CourseWidget(
-      courseModel: item,
-      semesterId: semesterId,
-      index: 0,
-      animation: animation,
-    );
-  }
 }
 
 class SemesterGPA extends ConsumerWidget {
   const SemesterGPA({
-    required this.semesterId,
+    required this.semsesterModel,
     super.key,
   });
 
-  final String semesterId;
+  final SemsesterModel semsesterModel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(courseControllerProvider(semesterId));
-
+    final controller = ref.watch(semesterGPAProvider(semsesterModel.courses));
+    final double gpa = switch (controller) {
+      AsyncData(:final value) => value,
+      AsyncLoading(:final value) => value ?? 0,
+      AsyncError() => 0,
+      final v => throw StateError('what is $v'),
+    };
     return SizedBox(
       width: 150,
       height: 40,
       child: Center(
         child: Text(
-          'GPA : ${controller.getSemesterGPA()}',
+          'GPA : $gpa',
           textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
