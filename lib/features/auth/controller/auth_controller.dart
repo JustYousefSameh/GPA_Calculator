@@ -12,7 +12,7 @@ final userProvider = StateProvider<UserModel?>((ref) {
   return user == null
       ? null
       : UserModel(
-          name: user.displayName!,
+          name: user.displayName ?? 'nothing',
           uid: user.uid,
           isAuthenticated: true,
           profilePic: user.photoURL ?? '',
@@ -49,7 +49,7 @@ class AuthController extends StateNotifier<bool> {
     final user = await _authRepository.signInWithGoogle();
     state = false;
     user.fold(
-      (l) => showSnackBar(context, l.message),
+      (l) => showErrorSnackBar(context, l.message),
       (userModel) =>
           _ref.read(userProvider.notifier).update((state) => userModel),
     );
@@ -69,7 +69,7 @@ class AuthController extends StateNotifier<bool> {
     );
     state = false;
     user.fold(
-      (l) => showSnackBar(context, l.message),
+      (l) => showErrorSnackBar(context, l.message),
       (r) => (UserModel userModel) =>
           _ref.read(userProvider.notifier).update((state) => userModel),
     );
@@ -87,7 +87,7 @@ class AuthController extends StateNotifier<bool> {
     );
     state = false;
     user.fold(
-      (l) => showSnackBar(context, l.message),
+      (l) => showErrorSnackBar(context, l.message),
       (r) => (UserModel userModel) =>
           _ref.read(userProvider.notifier).update((state) => userModel),
     );

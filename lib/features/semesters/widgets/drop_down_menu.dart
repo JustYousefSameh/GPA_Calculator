@@ -1,77 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/features/semesters/controller/gradetonumber_controller.dart';
 
 final gradeNumber = <String, double>{
-  'A+': 4,
+  // 'A+': 4,
   'A': 4,
-  'A-': 3.7,
-  'B+': 3.3,
+  'A-': 3.67,
+  'B+': 3.33,
   'B': 3,
-  'B-': 2.7,
-  'C+': 2.3,
-  'C': 2,
-  'C-': 1.7,
-  'D+': 1.3,
-  'D': 1,
+  // 'B-': 2.7,
+  'C+': 2.67,
+  'C': 2.33,
+  'C-': 2,
+  // 'D+': 1.3,
+  // 'D': 1,
   'F': 0,
 };
 
-class GPADropdown extends StatefulWidget {
+class GPADropdown extends ConsumerWidget {
   const GPADropdown({
     required this.selectedValue,
     required this.id,
     required this.updateGrade,
     super.key,
   });
-  final String selectedValue;
+  final String? selectedValue;
   final Function(String grade) updateGrade;
   final String id;
-  @override
-  GPADropdownState createState() => GPADropdownState();
-}
-
-class GPADropdownState extends State<GPADropdown> {
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      selectedGPA = widget.selectedValue;
-    });
-  }
-
-  late String? selectedGPA = 'A+';
-
-  List<String> gpaValues = [
-    'A+',
-    'A',
-    'A-',
-    'B+',
-    'B',
-    'B-',
-    'C+',
-    'C',
-    'C-',
-    'D+',
-    'D',
-    'F',
-  ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gradeScale = ref.watch(gradeScaleProvider);
     return DropdownButtonFormField<String>(
-      decoration: const InputDecoration(),
-      value: selectedGPA,
-      onChanged: (newValue) {
-        setState(() {
-          selectedGPA = newValue;
-          widget.updateGrade(newValue!);
-        });
-      },
-      items: gpaValues.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
+        decoration: const InputDecoration(),
+        value: selectedValue!.isEmpty ? null : selectedValue,
+        onChanged: (newValue) {
+          updateGrade(newValue!);
+        },
+        items: gradeScale.map(
+          data: (data) =>
+              data.value.entries.map<DropdownMenuItem<String>>((var value) {
+            return DropdownMenuItem<String>(
+              value: value.key,
+              child: Text(value.key),
+            );
+          }).toList(),
+          error: (error) => null,
+          loading: (loading) => null,
+        ));
   }
 }

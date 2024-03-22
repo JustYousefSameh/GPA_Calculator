@@ -1,53 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:gpa_calculator/core/common/loader.dart';
-import 'package:gpa_calculator/features/semesters/widgets/semester_widgets.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
-import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
-import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/features/home/drawers/profile_drawer.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gpa_calculator/core/utils.dart';
+import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
+import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
+
 import '../../../core/theme.dart';
 import '../controllers/gpa_provider.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  late Image profileImage;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // final imageUrl =
-    //     ref.read(userProvider)!.profilePic.replaceAll("s96-c", "s250-c");
-    // profileImage = Image.network(imageUrl);
-    // precacheImage(profileImage.image, context);
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final user = ref.watch(userProvider);
-
-    void displayEndDrawer(BuildContext context) {
-      Scaffold.of(context).openEndDrawer();
-    }
-
-    if (user != null) {
-      final imageUrl = user.profilePic.replaceAll("s96-c", "s250-c");
-      profileImage = Image.network(imageUrl);
-      precacheImage(profileImage.image, context);
-    }
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -64,23 +30,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          Builder(
-            builder: (context) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: IconButton(
-                    onPressed: () => displayEndDrawer(context),
-                    icon: ClipOval(
-                        child: user!.profilePic == ''
-                            ? Image.asset(Constants.defaultAvatarPath)
-                            : Image.network(user.profilePic))),
-              );
+          IconButton(
+            onPressed: () async {
+              await ref
+                  .read(semesterControllerProvider.notifier)
+                  .updateRemoteDatabase();
+              showSuccessSnackBar(context, "Data Synced");
             },
+            icon: const Icon(Icons.sync),
+          ),
+          IconButton(
+            onPressed: () => context.push("/settings"),
+            icon: const Icon(Icons.settings),
           ),
         ],
       ),
-      endDrawer: const ProfileDrawer(),
-      endDrawerEnableOpenDragGesture: false,
       body: GestureDetector(
         onTap: () {
           FocusManager.instance.primaryFocus?.unfocus();
@@ -112,8 +76,17 @@ class CumlativeGPA extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(gpaStateProvider);
+
+    final List<double> gpaValues = switch (controller) {
+      AsyncData(:final value) => value,
+      AsyncError() => [0, 0],
+      AsyncLoading(:final value) => value ?? [0, 0],
+      final v => throw StateError('what is $v'),
+    };
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 15),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
       child: Column(
         children: [
           Row(
@@ -139,14 +112,14 @@ class CumlativeGPA extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${ref.watch(gpaStateProvider)[1]}',
+                '${gpaValues[1]}',
                 style: GoogleFonts.rubik(
                   fontSize: 23,
                   color: Colors.black,
                 ),
               ),
               Text(
-                '${ref.watch(gpaStateProvider)[0]}',
+                '${gpaValues[0]}',
                 style: GoogleFonts.rubik(
                   fontSize: 33,
                   fontWeight: FontWeight.bold,
@@ -166,9 +139,9 @@ class SemesterListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final semesters = ref.watch(semesterStreamProvider);
+    final semesters = ref.watch(semesterControllerProvider);
     return semesters.when(
-      loading: () => const Center(child: Loader()),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) => Text(error.toString()),
       data: (semesterData) {
         return ListView.builder(
@@ -179,7 +152,7 @@ class SemesterListView extends ConsumerWidget {
             return Column(
               children: [
                 SemesterWidget(
-                  index: index,
+                  semesterIndex: index,
                   semsesterModel: semesterData[index],
                 ),
                 if (index != semesterData.length - 1)
@@ -203,28 +176,28 @@ class AddSemesterButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                  color: Colors.grey, //New
-                  blurRadius: 5,
-                  offset: Offset(0, 3))
-            ],
-            borderRadius: BorderRadius.circular(50),
-            color: secondary300,
-          ),
-          child: const Icon(
-            Icons.add,
-            size: 33,
-            color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.grey, //New
+                    blurRadius: 5,
+                    offset: Offset(0, 3))
+              ],
+              borderRadius: BorderRadius.circular(50),
+              color: secondary300,
+            ),
+            child: const Icon(
+              Icons.add,
+              size: 33,
+              color: Colors.white,
+            ),
           ),
         ),
-      ),
-      onTap: () => ref.read(semesterControllerProvider).addSemester(),
-    );
+        onTap: () =>
+            ref.read(semesterControllerProvider.notifier).addSemester());
   }
 }

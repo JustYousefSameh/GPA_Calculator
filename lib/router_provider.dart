@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/auth/screens/loginscreen.dart';
 import 'package:gpa_calculator/features/auth/screens/signupscreen.dart';
 import 'package:gpa_calculator/features/home/screens/homescreen.dart';
+import 'package:gpa_calculator/features/home/screens/settingsscreen.dart';
 import 'package:gpa_calculator/splash.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -31,7 +33,7 @@ class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   FutureOr<String?> _redirect(BuildContext context, GoRouterState state) {
-    final userModel = _ref.read(userProvider);
+    final userModel = _ref.watch(userProvider);
 
     if (userModel == null &&
         state.uri.toString() != '/login' &&
@@ -66,6 +68,10 @@ class RouterNotifier extends ChangeNotifier {
         GoRoute(
           path: '/splash',
           builder: (context, state) => const SplashPage(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
         ),
       ];
 }

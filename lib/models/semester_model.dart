@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:gpa_calculator/models/course_model.dart';
 import 'package:uuid/uuid.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
@@ -8,32 +10,45 @@ import 'package:uuid/uuid.dart';
 @immutable
 class SemsesterModel {
   final String id;
+  final List<CourseModel> courses;
 
   const SemsesterModel({
     required this.id,
+    required this.courses,
   });
 
   factory SemsesterModel.empty() => SemsesterModel(
         id: const Uuid().v1(),
+        courses: [
+          CourseModel.empty(),
+          CourseModel.empty(),
+          CourseModel.empty(),
+        ],
       );
 
   SemsesterModel copyWith({
     String? id,
+    List<CourseModel>? courses,
   }) {
     return SemsesterModel(
       id: id ?? this.id,
+      courses: courses ?? this.courses,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
+      'courses': courses.map((x) => x.toMap()).toList(),
     };
   }
 
   factory SemsesterModel.fromMap(Map<String, dynamic> map) {
     return SemsesterModel(
       id: map['id'] as String,
+      courses: List<CourseModel>.from(map['courses'].map(
+        (e) => CourseModel.fromMap(e),
+      )),
     );
   }
 
@@ -43,98 +58,16 @@ class SemsesterModel {
       SemsesterModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  @override
   bool operator ==(covariant SemsesterModel other) {
     if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
 
-    return other.id == id;
+    return other.id == id && listEquals(other.courses, courses);
   }
 
   @override
-  @override
-  String toString() => 'SemsesterModel(id: $id)';
+  String toString() => 'SemsesterModel(id: $id, courses: $courses)';
 
   @override
-  int get hashCode => id.hashCode;
-}
-
-class CourseModel {
-  final String courseName;
-  final String grade;
-  final int credits;
-  final String id;
-
-  CourseModel({
-    required this.courseName,
-    required this.grade,
-    required this.credits,
-    required this.id,
-  });
-
-  factory CourseModel.empty() => CourseModel(
-        courseName: '',
-        grade: 'A+',
-        credits: 0,
-        id: const Uuid().v1(),
-      );
-
-  CourseModel copyWith({
-    String? courseName,
-    String? grade,
-    int? credits,
-    String? id,
-  }) {
-    return CourseModel(
-      courseName: courseName ?? this.courseName,
-      grade: grade ?? this.grade,
-      credits: credits ?? this.credits,
-      id: id ?? this.id,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'courseName': courseName,
-      'grade': grade,
-      'credits': credits,
-      'id': id,
-    };
-  }
-
-  factory CourseModel.fromMap(Map<String, dynamic> map) {
-    return CourseModel(
-      courseName: map['courseName'] as String,
-      grade: map['grade'] as String,
-      credits: map['credits'] as int,
-      id: map['id'] as String,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory CourseModel.fromJson(String source) =>
-      CourseModel.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() {
-    return 'CourseModel(courseName: $courseName, grade: $grade, credits: $credits, id: $id)';
-  }
-
-  @override
-  bool operator ==(covariant CourseModel other) {
-    if (identical(this, other)) return true;
-
-    return other.courseName == courseName &&
-        other.grade == grade &&
-        other.credits == credits &&
-        other.id == id;
-  }
-
-  @override
-  int get hashCode {
-    return courseName.hashCode ^
-        grade.hashCode ^
-        credits.hashCode ^
-        id.hashCode;
-  }
+  int get hashCode => id.hashCode ^ courses.hashCode;
 }
