@@ -15,56 +15,25 @@ class SemesterRepository {
   final FirebaseFirestore _firestore;
   final Ref _ref;
 
-  CollectionReference get _semesters => _firestore
+  DocumentReference get _semestersDoc => _firestore
       .collection('users')
-      .doc(_ref.watch(userProvider)!.uid)
-      .collection('semesters');
+      .doc(_ref.watch(userIDProvider))
+      .collection('data')
+      .doc('semesters');
 
   Future<void> updateAllDatabase(List<SemsesterModel> listOfSemesters) async {
-    await _firestore
-        .collection('users')
-        .doc(_ref.watch(userProvider)!.uid)
+    await _semestersDoc
         .update({'semesters': listOfSemesters.map((e) => e.toMap()).toList()});
-
-    // await _semesters.get().then((value) async {
-    //   for (var model in remoteList) {
-    //     var isDeleted = listOfSemesters.indexWhere(
-    //       (element) => element.id == model.id,
-    //     );
-    //     if (isDeleted == -1) await doc.reference.delete();
-    //   }
-    // });
-
-    // for (var semester in listOfSemesters) {
-    //   await _semesters.doc(semester.id).set(semester.toMap());
-    // }
   }
 
   Future<void> addSemesterUsingID(String uid) async {
-    final data = SemsesterModel.empty();
-
-    final doc = _firestore
+    await _firestore
         .collection('users')
         .doc(uid)
-        .collection('semesters')
-        .doc(data.id);
-
-    final dataToAdd = <String, dynamic>{
-      'timestamp': FieldValue.serverTimestamp(),
-      'id': data.id
-    };
-
-    await doc.set(dataToAdd);
-  }
-
-  Future<void> addSemester(SemsesterModel data) async {
-    final doc = _semesters.doc(data.id);
-    final semesterData = data.toMap()
-      ..addAll({'timestamp': FieldValue.serverTimestamp()});
-    await doc.set(semesterData);
-  }
-
-  Future<void> deleteSemester(String id) async {
-    await _semesters.doc(id).delete();
+        .collection('data')
+        .doc('semesters')
+        .set({
+      'semesters': [SemsesterModel.empty().toMap()]
+    });
   }
 }

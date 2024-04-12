@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gpa_calculator/core/utils.dart';
-import 'package:gpa_calculator/features/semesters/controller/semsters_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/user_doc_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 
-import '../../../core/theme.dart';
 import '../controllers/gpa_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -14,31 +14,22 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(userDocProvider);
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset('assets/icons/GPA_NoText.png', width: 50),
+            Image.asset('assets/icons/GPA_NoText.png', width: 60),
             Text(
               "GPA Calculator",
               style: GoogleFonts.rubik(
-                fontSize: 30,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
-                color: secondary300,
               ),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await ref
-                  .read(semesterControllerProvider.notifier)
-                  .updateRemoteDatabase();
-              showSuccessSnackBar(context, "Data Synced");
-            },
-            icon: const Icon(Icons.sync),
-          ),
           IconButton(
             onPressed: () => context.push("/settings"),
             icon: const Icon(Icons.settings),
@@ -46,27 +37,48 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: GestureDetector(
-        onTap: () {
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
-        child: const Column(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Column(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  SemesterListView(),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: AddSemesterButton(),
-                  )
-                ],
-              ),
+            Expanded(child: SemesterWithButton()),
+            const Divider(
+              height: 1,
             ),
-            Divider(),
-            CumlativeGPA()
+            const CumlativeGPA()
           ],
         ),
       ),
+    );
+  }
+}
+
+class SemesterWithButton extends StatelessWidget {
+  SemesterWithButton({
+    super.key,
+  });
+
+  final GlobalKey<AnimatedListState> _semesterListKey =
+      GlobalKey<AnimatedListState>();
+
+  final ScrollController _controller = ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SemesterListView(
+          listKey: _semesterListKey,
+          scrollController: _controller,
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: AddSemesterButton(
+            listKey: _semesterListKey,
+            scrollController: _controller,
+          ),
+        )
+      ],
     );
   }
 }
@@ -86,7 +98,7 @@ class CumlativeGPA extends ConsumerWidget {
     };
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Column(
         children: [
           Row(
@@ -94,17 +106,15 @@ class CumlativeGPA extends ConsumerWidget {
             children: [
               Text(
                 "Credits Total",
-                style: GoogleFonts.rubik(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontSize: 18,
+                    ),
               ),
               Text(
                 "Your GPA",
-                style: GoogleFonts.rubik(
-                  fontSize: 18,
-                  color: Colors.black,
-                ),
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      fontSize: 18,
+                    ),
               ),
             ],
           ),
@@ -115,7 +125,7 @@ class CumlativeGPA extends ConsumerWidget {
                 '${gpaValues[1]}',
                 style: GoogleFonts.rubik(
                   fontSize: 23,
-                  color: Colors.black,
+                  // color: secondary,
                 ),
               ),
               Text(
@@ -123,7 +133,7 @@ class CumlativeGPA extends ConsumerWidget {
                 style: GoogleFonts.rubik(
                   fontSize: 33,
                   fontWeight: FontWeight.bold,
-                  color: secondary300,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -135,69 +145,80 @@ class CumlativeGPA extends ConsumerWidget {
 }
 
 class SemesterListView extends ConsumerWidget {
-  const SemesterListView({super.key});
+  const SemesterListView({
+    super.key,
+    required this.listKey,
+    required this.scrollController,
+  });
 
+  final GlobalKey<AnimatedListState> listKey;
+  final ScrollController scrollController;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final semesters = ref.watch(semesterControllerProvider);
-    return semesters.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Text(error.toString()),
-      data: (semesterData) {
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          itemCount: semesterData.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                SemesterWidget(
-                  semesterIndex: index,
-                  semsesterModel: semesterData[index],
-                ),
-                if (index != semesterData.length - 1)
-                  const Divider(
-                    indent: 40,
-                    endIndent: 40,
-                    thickness: 2,
-                  ),
-              ],
+    return ref.watch(semesterCounterProvider).when(
+          data: (data) {
+            return AnimatedList(
+              controller: scrollController,
+              key: listKey,
+              initialItemCount: data,
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, index, animation) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(-1, 0),
+                    end: const Offset(0, 0),
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.ease,
+                  )),
+                  child: SemesterWidget(semesterIndex: index),
+                );
+              },
             );
           },
+          error: (error, stack) => Text(error.toString()),
+          loading: () => const Center(child: CircularProgressIndicator()),
         );
-      },
-    );
   }
 }
 
 class AddSemesterButton extends ConsumerWidget {
-  const AddSemesterButton({super.key});
+  const AddSemesterButton({
+    super.key,
+    required this.listKey,
+    required this.scrollController,
+  });
+
+  final GlobalKey<AnimatedListState> listKey;
+  final ScrollController scrollController;
+
+  void addSemester(WidgetRef ref) async {
+    listKey.currentState!
+        .insertItem(await ref.read(semesterCounterProvider.future));
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 1000),
+        curve: Curves.fastOutSlowIn,
+      );
+    });
+    ref.read(semesterControllerProvider.notifier).addSemester();
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              boxShadow: const [
-                BoxShadow(
-                    color: Colors.grey, //New
-                    blurRadius: 5,
-                    offset: Offset(0, 3))
-              ],
-              borderRadius: BorderRadius.circular(50),
-              color: secondary300,
-            ),
-            child: const Icon(
-              Icons.add,
-              size: 33,
-              color: Colors.white,
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8, bottom: 8),
+      child: FloatingActionButton(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: Icon(
+            Icons.add,
+            size: 36,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
-        ),
-        onTap: () =>
-            ref.read(semesterControllerProvider.notifier).addSemester());
+          onPressed: () => addSemester(ref)),
+    );
   }
 }

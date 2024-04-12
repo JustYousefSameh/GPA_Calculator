@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,4 +56,16 @@ class DefaultFirebaseOptions {
     projectId: 'gpa-calculator-4eb7b',
     storageBucket: 'gpa-calculator-4eb7b.appspot.com',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDEAqk4NS5QdsISVYFRLeiffJ74t1168bI',
+    appId: '1:1019690643363:ios:47fa3ba1de1168081a7416',
+    messagingSenderId: '1019690643363',
+    projectId: 'gpa-calculator-4eb7b',
+    storageBucket: 'gpa-calculator-4eb7b.appspot.com',
+    androidClientId: '1019690643363-6a0s8svpkln5hnp689j3q43jfef1ka4k.apps.googleusercontent.com',
+    iosClientId: '1019690643363-7500phj8uavirdg3aa06d3p5emnbl4um.apps.googleusercontent.com',
+    iosBundleId: 'com.p0wer.gpaCalculator',
+  );
+
 }

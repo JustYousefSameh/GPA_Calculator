@@ -5,17 +5,18 @@ import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/type_defs.dart';
+import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 
 final authRepositoryProvider = Provider(
   (ref) => AuthRepository(
-    firestore: ref.read(firestoreProvider),
-    auth: ref.read(authProvider),
-    googleSignIn: ref.read(googleSignInProvider),
-    semesterRepository: ref.read(semestersRepositoryProvider),
-  ),
+      firestore: ref.read(firestoreProvider),
+      auth: ref.read(authProvider),
+      googleSignIn: ref.read(googleSignInProvider),
+      semesterRepository: ref.read(semestersRepositoryProvider),
+      gradeToNumberRepository: ref.read(gradeToNumberRepositoryProvider)),
 );
 
 class AuthRepository {
@@ -24,21 +25,30 @@ class AuthRepository {
     required FirebaseAuth auth,
     required GoogleSignIn googleSignIn,
     required SemesterRepository semesterRepository,
+    required GradeToScaleRepository gradeToNumberRepository,
   })  : _auth = auth,
         _firestore = firestore,
         _googleSignIn = googleSignIn,
-        _semesterRepository = semesterRepository;
+        _semesterRepository = semesterRepository,
+        _gradeToNumberRepository = gradeToNumberRepository;
+
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+  final GradeToScaleRepository _gradeToNumberRepository;
   final SemesterRepository _semesterRepository;
 
   CollectionReference get _users => _firestore.collection('users');
 
   Stream<User?> get authStateChange => _auth.authStateChanges();
 
+  Future<void> setDefaults(String uid) async {
+    await _semesterRepository.addSemesterUsingID(uid);
+    await _gradeToNumberRepository.setDefaultValue(uid);
+  }
+
   FutureEither<UserModel> signUpWithEmailAndPassword(
-    String? userName,
+    String userName,
     String emailAddress,
     String password,
   ) async {
@@ -48,16 +58,18 @@ class AuthRepository {
         password: password,
       );
 
-      UserModel userModel;
+      await userCredential.user?.updateDisplayName(userName);
 
-      userModel = UserModel(
-        name: userName ?? 'No Name',
+      final userModel = UserModel(
+        name: userName,
+        emailAddress: emailAddress,
         uid: userCredential.user!.uid,
         isAuthenticated: true,
         profilePic: userCredential.user!.photoURL ?? '',
       );
+
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
-      await _semesterRepository.addSemesterUsingID(userCredential.user!.uid);
+      await setDefaults(userCredential.user!.uid);
 
       return right(userModel);
     } on FirebaseAuthException catch (e) {
@@ -70,6 +82,15 @@ class AuthRepository {
     }
   }
 
+  UserModel firebaseUserToUserModel(User user) {
+    return UserModel(
+        name: user.displayName ?? 'Name not set',
+        emailAddress: user.email!,
+        uid: user.uid,
+        isAuthenticated: true,
+        profilePic: user.photoURL ?? '');
+  }
+
   FutureEither<UserModel> signInWithEmailAndPassword(
     String emailAddress,
     String password,
@@ -79,7 +100,7 @@ class AuthRepository {
         email: emailAddress,
         password: password,
       );
-      final userModel = await getUserData(userCredential.user!.uid).first;
+      final userModel = firebaseUserToUserModel(userCredential.user!);
 
       return right(userModel);
     } on FirebaseAuthException catch (e) {
@@ -90,7 +111,6 @@ class AuthRepository {
         print('Invalid passowrd');
         return left(Failure('Invalid passowrd'));
       }
-      print(e.code);
       return left(Failure(e.message!));
     }
   }
@@ -116,13 +136,14 @@ class AuthRepository {
       final userDoc = await _users.doc(userCredential.user!.uid).get();
       if (userCredential.additionalUserInfo!.isNewUser || !userDoc.exists) {
         userModel = UserModel(
-          name: userCredential.user!.displayName ?? 'No Name',
+          emailAddress: userCredential.user!.email!,
+          name: userCredential.user!.displayName!,
           uid: userCredential.user!.uid,
           isAuthenticated: true,
           profilePic: userCredential.user!.photoURL ?? '',
         );
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
-        await _semesterRepository.addSemesterUsingID(userCredential.user!.uid);
+        await setDefaults(userCredential.user!.uid);
       } else {
         userModel = await getUserData(userCredential.user!.uid).first;
       }
@@ -140,8 +161,12 @@ class AuthRepository {
         );
   }
 
+  Future<void> forgotPassword(String emailAddress) async {
+    await _auth.sendPasswordResetEmail(email: emailAddress);
+  }
+
   Future<void> logOut() async {
-    await _googleSignIn.signOut();
     await _auth.signOut();
+    if (await _googleSignIn.isSignedIn()) await _googleSignIn.disconnect();
   }
 }

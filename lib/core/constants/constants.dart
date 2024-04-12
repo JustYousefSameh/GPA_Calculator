@@ -1,29 +1,26 @@
-import 'package:flutter/material.dart';
+import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 class Constants {
-  static const logoPath = 'assets/images/logo.png';
-  static const loginEmotePath = 'assets/images/loginEmote.png';
   static const googlePath = 'assets/images/google.png';
-  static const defaultAvatarPath = 'assets/images/user.png';
 
-  static const bannerDefault =
-      'https://thumbs.dreamstime.com/b/abstract-stained-pattern-rectangle-background-blue-sky-over-fiery-red-orange-color-modern-painting-art-watercolor-effe-texture-123047399.jpg';
   static const avatarDefault =
-      'https://external-preview.redd.it/5kh5OreeLd85QsqYO1Xz_4XSLYwZntfjqou-8fyBFoE.png?auto=webp&s=dbdabd04c399ce9c761ff899f5d38656d1de87c2';
+      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
 
-  static const IconData up = IconData(0xe800, fontFamily: 'MyFlutterApp');
-  static const IconData down = IconData(0xe801, fontFamily: 'MyFlutterApp');
+  static RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
 
-  static const awardsPath = 'assets/images/awards';
-
-  static const awards = {
-    'awesomeAns': '${Constants.awardsPath}/awesomeanswer.png',
-    'gold': '${Constants.awardsPath}/gold.png',
-    'platinum': '${Constants.awardsPath}/platinum.png',
-    'helpful': '${Constants.awardsPath}/helpful.png',
-    'plusone': '${Constants.awardsPath}/plusone.png',
-    'rocket': '${Constants.awardsPath}/rocket.png',
-    'thankyou': '${Constants.awardsPath}/thankyou.png',
-    'til': '${Constants.awardsPath}/til.png',
-  };
+  static const gradeScale = [
+    GradeToScale(isEnabled: true, map: {"A+": 4.3}),
+    GradeToScale(isEnabled: true, map: {"A": 4.0}),
+    GradeToScale(isEnabled: true, map: {"A-": 3.7}),
+    GradeToScale(isEnabled: true, map: {"B+": 3.3}),
+    GradeToScale(isEnabled: true, map: {"B": 3.0}),
+    GradeToScale(isEnabled: true, map: {"B-": 2.7}),
+    GradeToScale(isEnabled: true, map: {"C+": 2.3}),
+    GradeToScale(isEnabled: true, map: {"C": 2.0}),
+    GradeToScale(isEnabled: true, map: {"C-": 1.7}),
+    GradeToScale(isEnabled: true, map: {"D+": 1.3}),
+    GradeToScale(isEnabled: true, map: {"D": 1.0}),
+    GradeToScale(isEnabled: true, map: {"D-": 0.7}),
+    GradeToScale(isEnabled: true, map: {"F": 0.0}),
+  ];
 }

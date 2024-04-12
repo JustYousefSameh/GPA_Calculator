@@ -4,11 +4,13 @@ import 'dart:convert';
 
 class UserModel {
   final String name;
+  final String emailAddress;
   final String uid;
   final bool isAuthenticated;
   final String profilePic;
   UserModel({
     required this.name,
+    required this.emailAddress,
     required this.uid,
     required this.isAuthenticated,
     required this.profilePic,
@@ -16,12 +18,14 @@ class UserModel {
 
   UserModel copyWith({
     String? name,
+    String? emailAddress,
     String? uid,
     bool? isAuthenticated,
     String? profilePic,
   }) {
     return UserModel(
       name: name ?? this.name,
+      emailAddress: emailAddress ?? this.emailAddress,
       uid: uid ?? this.uid,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       profilePic: profilePic ?? this.profilePic,
@@ -31,6 +35,7 @@ class UserModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'name': name,
+      'emailAddress': emailAddress,
       'uid': uid,
       'isAuthenticated': isAuthenticated,
       'profilePic': profilePic,
@@ -40,6 +45,7 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       name: map['name'] as String,
+      emailAddress: map['emailAddress'] as String,
       uid: map['uid'] as String,
       isAuthenticated: map['isAuthenticated'] as bool,
       profilePic: map['profilePic'] as String,
@@ -48,7 +54,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(name: $name, uid: $uid, isAuthenticated: $isAuthenticated, profilePic: $profilePic)';
+    return 'UserModel(name: $name, emailAddress: $emailAddress, uid: $uid, isAuthenticated: $isAuthenticated, profilePic: $profilePic)';
   }
 
   @override
@@ -56,6 +62,7 @@ class UserModel {
     if (identical(this, other)) return true;
 
     return other.name == name &&
+        other.emailAddress == emailAddress &&
         other.uid == uid &&
         other.isAuthenticated == isAuthenticated &&
         other.profilePic == profilePic;
@@ -64,6 +71,7 @@ class UserModel {
   @override
   int get hashCode {
     return name.hashCode ^
+        emailAddress.hashCode ^
         uid.hashCode ^
         isAuthenticated.hashCode ^
         profilePic.hashCode;

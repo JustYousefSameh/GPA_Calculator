@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,22 +8,24 @@ import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 
-final userProvider = StateProvider<UserModel?>((ref) {
+final userIDProvider = StateProvider<String?>((ref) {
   final user = ref.watch(authStateChangeProvider).asData?.value;
-  return user == null
-      ? null
-      : UserModel(
-          name: user.displayName ?? 'nothing',
-          uid: user.uid,
-          isAuthenticated: true,
-          profilePic: user.photoURL ?? '',
-        );
+  return user?.uid;
+  //  == null
+  //     ? null
+  //     : UserModel(
+  //         name: user.displayName ?? 'nothing',
+  //         uid: user.uid,
+  //         isAuthenticated: true,
+  //         emailAddress: user.email ?? '',
+  //         profilePic: user.photoURL ?? '',
+  //       );
 });
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
     authRepository: ref.watch(authRepositoryProvider),
-    ref: ref,
+    // ref: ref,
   ),
 );
 
@@ -36,12 +39,12 @@ final getUserDataProvider = StreamProvider.family((ref, String uid) {
 });
 
 class AuthController extends StateNotifier<bool> {
-  AuthController({required AuthRepository authRepository, required Ref ref})
+  AuthController({required AuthRepository authRepository})
       : _authRepository = authRepository,
-        _ref = ref,
+        // _ref = ref,
         super(false);
   final AuthRepository _authRepository;
-  final Ref _ref;
+  // final Ref _ref;
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
   Future<void> signInWithGoogle(BuildContext context) async {
@@ -50,8 +53,7 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (l) => showErrorSnackBar(context, l.message),
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
+      (userModel) => {},
     );
   }
 
@@ -68,11 +70,8 @@ class AuthController extends StateNotifier<bool> {
       password,
     );
     state = false;
-    user.fold(
-      (l) => showErrorSnackBar(context, l.message),
-      (r) => (UserModel userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
-    );
+    user.fold((l) => showErrorSnackBar(context, l.message),
+        (r) => (UserModel userModel) {});
   }
 
   Future<void> singInWithEmailAndPassowrd(
@@ -85,11 +84,12 @@ class AuthController extends StateNotifier<bool> {
       emailAddress,
       password,
     );
+    await FirebaseAnalytics.instance.logLogin(loginMethod: "email");
+
     state = false;
     user.fold(
       (l) => showErrorSnackBar(context, l.message),
-      (r) => (UserModel userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
+      (r) => (UserModel userModel) => {},
     );
   }
 
@@ -99,5 +99,9 @@ class AuthController extends StateNotifier<bool> {
 
   Future<void> logout() async {
     await _authRepository.logOut();
+  }
+
+  Future<void> forgotPassword(String emailAddress) async {
+    await _authRepository.forgotPassword(emailAddress);
   }
 }

@@ -21,6 +21,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final passwordTextController = TextEditingController();
 
   @override
+  void dispose() {
+    userNameTextController.dispose();
+    emailTextController.dispose();
+    passwordTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider);
 
@@ -41,198 +49,212 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sign Up'),
-        centerTitle: true,
-      ),
-      resizeToAvoidBottomInset: false,
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-            child: Form(
-              autovalidateMode: validationMode,
-              key: _formKey,
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    'Register Account',
-                    style: GoogleFonts.roboto(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Complete your details or continue \nwith google',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Name',
-                      style: GoogleFonts.roboto(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your name';
-                      }
-                      return null;
-                    },
-                    controller: userNameTextController,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      suffixIcon: Icon(Icons.perm_identity),
-                      suffixIconColor: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Email',
-                      style: GoogleFonts.roboto(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
-                          .hasMatch(value)) {
-                        return 'Please enter a valid email address';
-                      }
-                      // You can add more email validation here if needed
-                      return null;
-                    },
-                    controller: emailTextController,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      suffixIcon: Icon(Icons.email_outlined),
-                      suffixIconColor: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Password',
-                      style: GoogleFonts.roboto(
-                        fontSize: 15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      // You can add more password validation here if needed
-                      return null;
-                    },
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    controller: passwordTextController,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                      suffixIcon: Icon(Icons.lock),
-                      suffixIconColor: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 50),
-                  ElevatedButton(
-                    onPressed: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-
-                      if (_formKey.currentState!.validate()) {
-                        signUpWithEmailAndPassword(
-                          context,
-                          ref,
-                          userNameTextController.text,
-                          emailTextController.text,
-                          passwordTextController.text,
-                        );
-                      } else {
-                        setState(() {
-                          validationMode = AutovalidateMode.always;
-                        });
-                      }
-                    },
-                    child: Text(
-                      'Sign up',
-                      style: GoogleFonts.lato(fontSize: 20),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      resizeToAvoidBottomInset: true,
+      body: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                  child: Column(
                     children: [
-                      const Text(
-                        'Already have an account?  ',
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      GestureDetector(
-                        onTap: () => navigateToLoginPage(context),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 15,
-                            decoration: TextDecoration.underline,
-                          ),
+                      const SizedBox(height: 80),
+                      Text(
+                        'Sign up',
+                        style: GoogleFonts.roboto(
+                          fontSize: 34,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  if (isLoading) const LinearProgressIndicator(),
-                  const Spacer(),
-                  const Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(child: Divider(thickness: 2)),
-                      Padding(
-                        padding: EdgeInsets.only(left: 10, right: 10),
-                        child: Text('Or', style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Complete your details \nor continue with google',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.roboto(
+                          fontSize: 20,
+                        ),
                       ),
-                      Expanded(child: Divider(thickness: 2)),
+                      const SizedBox(height: 40),
+                      Form(
+                        autovalidateMode: validationMode,
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Name',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your name';
+                                }
+                                return null;
+                              },
+                              controller: userNameTextController,
+                              decoration: InputDecoration(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                suffixIcon: const Icon(Icons.perm_identity),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Email',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                if (!RegExp(
+                                        r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
+                                    .hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                // You can add more email validation here if needed
+                                return null;
+                              },
+                              controller: emailTextController,
+                              decoration: InputDecoration(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                suffixIcon: const Icon(Icons.email_outlined),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Password',
+                                style: GoogleFonts.roboto(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your password';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                // You can add more password validation here if needed
+                                return null;
+                              },
+                              obscureText: true,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              controller: passwordTextController,
+                              decoration: InputDecoration(
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                suffixIcon: const Icon(Icons.lock),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                            minimumSize: Size.fromHeight(50)),
+                        onPressed: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+
+                          if (_formKey.currentState!.validate()) {
+                            signUpWithEmailAndPassword(
+                              context,
+                              ref,
+                              userNameTextController.text,
+                              emailTextController.text,
+                              passwordTextController.text,
+                            );
+                          } else {
+                            setState(() {
+                              validationMode = AutovalidateMode.always;
+                            });
+                          }
+                        },
+                        child: Text(
+                          'Sign up',
+                          style: GoogleFonts.lato(fontSize: 20),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Already have an account?  ',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                          GestureDetector(
+                            onTap: () => navigateToLoginPage(context),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                fontSize: 15,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      if (isLoading) const LinearProgressIndicator(),
+                      const Spacer(),
+                      const Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(child: Divider(thickness: 2)),
+                          Padding(
+                            padding: EdgeInsets.only(left: 10, right: 10),
+                            child: Text('Or', style: TextStyle(fontSize: 18)),
+                          ),
+                          Expanded(child: Divider(thickness: 2)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      const SignInButton(),
+                      const SizedBox(height: 40),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  const SignInButton(),
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
