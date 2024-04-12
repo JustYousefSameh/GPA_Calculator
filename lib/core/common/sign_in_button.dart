@@ -15,14 +15,11 @@ class SignInButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       label: Text(
         'Countinue with Google',
-        style: GoogleFonts.openSans(
-          color: Colors.black,
-          fontWeight: FontWeight.normal,
-        ),
+        style: GoogleFonts.openSans(),
       ),
       onPressed: () => signInWithGoogle(context, ref),
       icon: Image.asset(

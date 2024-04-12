@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "1019690643363-qfrop0s15lu8nvcmah1htdpola7jjob9.apps.googleusercontent.com",
+          "client_id": "1019690643363-6a0s8svpkln5hnp689j3q43jfef1ka4k.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.p0wer.gpa_calculator",
-            "certificate_hash": "652d03f660b22cd575742a028e19721dcee99207"
+            "certificate_hash": "8418de4eb834bc564e11e93537fba10ad0e02809"
           }
         },
         {
