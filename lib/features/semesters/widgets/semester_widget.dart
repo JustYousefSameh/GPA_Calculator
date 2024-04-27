@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
-import 'package:gpa_calculator/features/semesters/widgets/animated_courseslist.dart';
+import 'package:gpa_calculator/features/semesters/widgets/course_list_widget.dart';
 import 'package:gpa_calculator/features/semesters/widgets/course_widget.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
@@ -179,16 +179,17 @@ class DummySemesterWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                      width: 125,
-                      height: 35,
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                        ),
-                        onPressed: () {},
-                        icon: Icon(Icons.add),
-                        label: Text('Add Course'),
-                      )),
+                    width: 125,
+                    height: 35,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      onPressed: () {},
+                      icon: Icon(Icons.add),
+                      label: Text('Add Course'),
+                    ),
+                  ),
                   SemesterGPA(
                     semesterIndex: semesterIndex,
                     passedCourseList: semesterModel.courses,

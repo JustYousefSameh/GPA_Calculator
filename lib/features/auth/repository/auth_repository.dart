@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gpa_calculator/core/failure.dart';
-import 'package:gpa_calculator/core/type_defs.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
@@ -47,7 +46,7 @@ class AuthRepository {
     await _gradeToNumberRepository.setDefaultValue(uid);
   }
 
-  FutureEither<UserModel> signUpWithEmailAndPassword(
+  Future<Either<Failure, Unit>> signUpWithEmailAndPassword(
     String userName,
     String emailAddress,
     String password,
@@ -71,7 +70,7 @@ class AuthRepository {
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       await setDefaults(userCredential.user!.uid);
 
-      return right(userModel);
+      return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -91,18 +90,17 @@ class AuthRepository {
         profilePic: user.photoURL ?? '');
   }
 
-  FutureEither<UserModel> signInWithEmailAndPassword(
+  Future<Either<Failure, Unit>> signInWithEmailAndPassword(
     String emailAddress,
     String password,
   ) async {
     try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: emailAddress,
         password: password,
       );
-      final userModel = firebaseUserToUserModel(userCredential.user!);
 
-      return right(userModel);
+      return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
@@ -115,7 +113,7 @@ class AuthRepository {
     }
   }
 
-  FutureEither<UserModel> signInWithGoogle() async {
+  Future<Either<Failure, Unit>> signInWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
 
@@ -147,11 +145,9 @@ class AuthRepository {
       } else {
         userModel = await getUserData(userCredential.user!.uid).first;
       }
-      return right(userModel);
+      return right(unit);
     } on FirebaseException catch (e) {
       return left(Failure(e.message!));
-    } catch (e) {
-      return left(Failure(e.toString()));
     }
   }
 

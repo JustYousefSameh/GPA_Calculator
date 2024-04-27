@@ -29,87 +29,45 @@ final semesterGPAProvider =
       : double.parse((gradePoints / totalCredit).toStringAsPrecision(3));
 });
 
-final gpaStateProvider = FutureProvider((ref) async {
-  double totalGradePoints = 0;
-  double totalCredits = 0;
+final gpaStateProvider = FutureProvider(
+  (ref) async {
+    double totalGradePoints = 0;
+    double totalCredits = 0;
 
-  final semesterList = await ref.watch(semesterControllerProvider.future);
-  final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
+    final semesterList = await ref.watch(semesterControllerProvider.future);
+    final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
 
-  double getTotalCredit(List<CourseModel> courseModelList) {
-    double totalCredit = 0;
-    for (var element in courseModelList) {
-      if (element.grade != '') {
-        totalCredit += element.credits;
+    double getTotalCredit(List<CourseModel> courseModelList) {
+      double totalCredit = 0;
+      for (var element in courseModelList) {
+        if (element.grade != '') {
+          totalCredit += element.credits;
+        }
       }
+      return totalCredit;
     }
-    return totalCredit;
-  }
 
-  double getgradePoints(List<CourseModel> courseModelList) {
-    double gradePoints = 0;
-    for (var element in courseModelList) {
-      gradePoints += element.credits * (gradeNumber[element.grade] ?? 0);
+    double getgradePoints(List<CourseModel> courseModelList) {
+      double gradePoints = 0;
+      for (var element in courseModelList) {
+        gradePoints += element.credits * (gradeNumber[element.grade] ?? 0);
+      }
+      return gradePoints;
     }
-    return gradePoints;
-  }
 
-  for (var semesterModel in semesterList) {
-    totalCredits += getTotalCredit(semesterModel.courses);
-    totalGradePoints += getgradePoints(semesterModel.courses);
-  }
+    for (var semesterModel in semesterList) {
+      totalCredits += getTotalCredit(semesterModel.courses);
+      totalGradePoints += getgradePoints(semesterModel.courses);
+    }
 
-  final result = <double>[
-    ((totalGradePoints / totalCredits).isNaN)
-        ? 0
-        : double.parse(
-            (totalGradePoints / totalCredits).toStringAsPrecision(3)),
-    totalCredits
-  ];
+    final result = <double>[
+      ((totalGradePoints / totalCredits).isNaN)
+          ? 0
+          : double.parse(
+              (totalGradePoints / totalCredits).toStringAsPrecision(3)),
+      totalCredits
+    ];
 
-  return result;
-});
-
-// class GPAStateProviderController extends AsyncNotifier<List<double>> {
-//   @override
-//   FutureOr<List<double>> build() async {
-//     double totalGradePoints = 0;
-//     double totalCredits = 0;
-
-//     final semesterList = await ref.watch(semesterControllerProvider.future);
-//     final gradeNumber = await ref.watch(gradeScaleProvider.future);
-
-//     double getTotalCredit(List<CourseModel> courseModelList) {
-//       double totalCredit = 0;
-//       for (var element in courseModelList) {
-//         if (element.credits != 0) {
-//           totalCredit += element.credits;
-//         }
-//       }
-//       return totalCredit;
-//     }
-
-//     double getgradePoints(List<CourseModel> courseModelList) {
-//       double gradePoints = 0;
-//       for (var element in courseModelList) {
-//         gradePoints += element.credits * (gradeNumber[element.grade] ?? 0);
-//       }
-//       return gradePoints;
-//     }
-
-//     for (var semesterModel in semesterList) {
-//       totalCredits += getTotalCredit(semesterModel.courses);
-//       totalGradePoints += getgradePoints(semesterModel.courses);
-//     }
-
-//     final result = <double>[
-//       if ((totalGradePoints / totalCredits).isNaN)
-//         0
-//       else
-//         double.parse((totalGradePoints / totalCredits).toStringAsPrecision(3)),
-//       totalCredits
-//     ];
-
-//     return result;
-//   }
-// }
+    return result;
+  },
+);

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
@@ -21,19 +23,33 @@ class SemesterRepository {
       .collection('data')
       .doc('semesters');
 
-  Future<void> updateAllDatabase(List<SemsesterModel> listOfSemesters) async {
-    await _semestersDoc
-        .update({'semesters': listOfSemesters.map((e) => e.toMap()).toList()});
+  Future<Either<Failure, Unit>> updateAllDatabase(
+      List<SemsesterModel> listOfSemesters) async {
+    try {
+      await _semestersDoc.update(
+        {
+          'semesters': listOfSemesters.map((e) => e.toMap()).toList(),
+        },
+      );
+      return right(unit);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.code));
+    }
   }
 
-  Future<void> addSemesterUsingID(String uid) async {
-    await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('data')
-        .doc('semesters')
-        .set({
-      'semesters': [SemsesterModel.empty().toMap()]
-    });
+  Future<Either<Failure, Unit>> addSemesterUsingID(String uid) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('data')
+          .doc('semesters')
+          .set({
+        'semesters': [SemsesterModel.empty().toMap()]
+      });
+      return right(unit);
+    } on FirebaseException catch (e) {
+      return left(Failure(e.code));
+    }
   }
 }
