@@ -1,25 +1,11 @@
 import 'dart:async';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/course_model.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
-
-// final semesterRemoteFutureProvider =
-//     FutureProvider<List<SemsesterModel>>((ref) async {
-//   final semestersSnapshot = await ref
-//       .read(firestoreProvider)
-//       .collection('users')
-//       .doc(ref.watch(userIDProvider)!.uid)
-//       // .collection('semesters')
-//       // .orderBy('timestamp', descending: false)
-//       .get();
-
-//   return data;
-// });
 
 class SemesterCounterNotifier extends AsyncNotifier<int> {
   @override
@@ -67,8 +53,6 @@ class SemesterController extends AsyncNotifier<List<SemsesterModel>> {
         List.from(state.asData!.value..add(SemsesterModel.empty()));
     ref.read(semesterCounterProvider.notifier).update((p0) => p0 + 1);
     state = AsyncData(newList);
-    FirebaseAnalytics.instance
-        .logEvent(name: 'PleaseWork', parameters: {'what': 'working'});
   }
 
   void deleteSemester(String id) async {
@@ -96,7 +80,12 @@ class SemesterController extends AsyncNotifier<List<SemsesterModel>> {
 
   Future<void> updateRemoteDatabase() async {
     if (!state.hasValue) return;
-    await _semesterRepository.updateAllDatabase(state.asData!.value);
+    final successOrFailure =
+        await _semesterRepository.updateAllDatabase(state.asData!.value);
+    successOrFailure.fold(
+      (l) => throw Error,
+      (r) => null,
+    );
   }
 }
 

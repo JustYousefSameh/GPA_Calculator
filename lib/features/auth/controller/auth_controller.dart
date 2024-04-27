@@ -11,21 +11,11 @@ import 'package:gpa_calculator/models/user_model.dart';
 final userIDProvider = StateProvider<String?>((ref) {
   final user = ref.watch(authStateChangeProvider).asData?.value;
   return user?.uid;
-  //  == null
-  //     ? null
-  //     : UserModel(
-  //         name: user.displayName ?? 'nothing',
-  //         uid: user.uid,
-  //         isAuthenticated: true,
-  //         emailAddress: user.email ?? '',
-  //         profilePic: user.photoURL ?? '',
-  //       );
 });
 
 final authControllerProvider = StateNotifierProvider<AuthController, bool>(
   (ref) => AuthController(
     authRepository: ref.watch(authRepositoryProvider),
-    // ref: ref,
   ),
 );
 
@@ -41,10 +31,8 @@ final getUserDataProvider = StreamProvider.family((ref, String uid) {
 class AuthController extends StateNotifier<bool> {
   AuthController({required AuthRepository authRepository})
       : _authRepository = authRepository,
-        // _ref = ref,
         super(false);
   final AuthRepository _authRepository;
-  // final Ref _ref;
   Stream<User?> get authStateChange => _authRepository.authStateChange;
 
   Future<void> signInWithGoogle(BuildContext context) async {
@@ -53,7 +41,7 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (l) => showErrorSnackBar(context, l.message),
-      (userModel) => {},
+      (r) => {},
     );
   }
 
@@ -70,8 +58,10 @@ class AuthController extends StateNotifier<bool> {
       password,
     );
     state = false;
-    user.fold((l) => showErrorSnackBar(context, l.message),
-        (r) => (UserModel userModel) {});
+    user.fold(
+      (l) => showErrorSnackBar(context, l.message),
+      (r) => {},
+    );
   }
 
   Future<void> singInWithEmailAndPassowrd(
@@ -89,7 +79,7 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (l) => showErrorSnackBar(context, l.message),
-      (r) => (UserModel userModel) => {},
+      (r) => {},
     );
   }
 
