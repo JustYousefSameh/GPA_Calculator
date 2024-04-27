@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gpa_calculator/core/common/splash.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/auth/screens/forgotscreen.dart';
 import 'package:gpa_calculator/features/auth/screens/signinscreen.dart';
 import 'package:gpa_calculator/features/auth/screens/signupscreen.dart';
 import 'package:gpa_calculator/features/home/screens/homescreen.dart';
 import 'package:gpa_calculator/features/settings/screens/settingsscreen.dart';
-import 'package:gpa_calculator/splash.dart';
 
 final routerProvider = Provider(
   (ref) {

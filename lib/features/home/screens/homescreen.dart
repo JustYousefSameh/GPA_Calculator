@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gpa_calculator/core/theme_provider.dart';
 import 'package:gpa_calculator/features/semesters/controller/user_doc_controller.dart';
-import 'package:gpa_calculator/features/theme_provider.dart';
 
 import '../widgets/cumlative_gpa.dart';
 import '../widgets/semester_with_button.dart';

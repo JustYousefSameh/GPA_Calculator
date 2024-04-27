@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/features/theme_provider.dart';
+import 'package:gpa_calculator/core/theme_provider.dart';
 
 class DarkMode extends ConsumerWidget {
   const DarkMode({
