@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/user_doc_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
-import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/course_model.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
@@ -21,10 +22,12 @@ final semesterCounterProvider =
 
 final semesterStreamProvider = StreamProvider<List<SemsesterModel>>(
   (ref) async* {
+    final id = ref.watch(userIDProvider);
+
     yield* ref
         .read(firestoreProvider)
         .collection('users')
-        .doc(ref.watch(userIDProvider))
+        .doc(id)
         .collection('data')
         .doc('semesters')
         .snapshots()
@@ -39,10 +42,16 @@ final semesterStreamProvider = StreamProvider<List<SemsesterModel>>(
   },
 );
 
-class SemesterController extends AsyncNotifier<List<SemsesterModel>> {
+class SemesterController
+    extends AutoDisposeAsyncNotifier<List<SemsesterModel>> {
   @override
   FutureOr<List<SemsesterModel>> build() async {
-    return await ref.watch(semesterStreamProvider.future);
+    print("In semester controller");
+    print(ref.watch(userDocProvider));
+    final value = await ref.watch(semesterStreamProvider.future);
+    print("value of semester stream");
+    print(value);
+    return value;
   }
 
   late final SemesterRepository _semesterRepository =
@@ -90,6 +99,6 @@ class SemesterController extends AsyncNotifier<List<SemsesterModel>> {
 }
 
 final semesterControllerProvider =
-    AsyncNotifierProvider<SemesterController, List<SemsesterModel>>(
+    AsyncNotifierProvider.autoDispose<SemesterController, List<SemsesterModel>>(
   SemesterController.new,
 );

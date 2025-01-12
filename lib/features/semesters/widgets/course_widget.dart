@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/drop_down_menu.dart';
+import 'package:gpa_calculator/features/semesters/widgets/dummy_widgets.dart';
 
 class CourseWidget extends ConsumerStatefulWidget {
-  CourseWidget({
+  const CourseWidget({
     required this.semesterIndex,
     required this.courseIndex,
     super.key,
@@ -73,12 +75,36 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
       controller.deleteCourse(widget.semesterIndex, widget.courseIndex);
       AnimatedList.of(context).removeItem(
         widget.courseIndex,
-        (context, animation) => DummyCourseWidget(
-          courseName: courseModel.courseName,
-          grade: courseModel.grade,
-          credits: courseModel.credits,
-        ),
-        duration: Duration(milliseconds: 700),
+        (context, animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(-1.2, 0),
+              end: const Offset(0, 0),
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: const Interval(0.5, 1, curve: Curves.ease),
+              ),
+            ),
+            child: SizeTransition(
+              sizeFactor: Tween<double>(
+                begin: 0,
+                end: 1,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: const Interval(0, 0.5, curve: Curves.ease),
+                ),
+              ),
+              child: DummyCourseWidget(
+                courseName: courseModel.courseName,
+                grade: courseModel.grade,
+                credits: courseModel.credits,
+              ),
+            ),
+          );
+        },
+        duration: const Duration(milliseconds: 700),
       );
     }
 
@@ -93,7 +119,7 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
               child: TextField(
                 controller: nameController,
                 onChanged: (_) => updateCourseModel(),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
               ),
@@ -120,10 +146,15 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
               padding: const EdgeInsets.only(left: 5),
               child: TextField(
                 controller: creditController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
-                inputFormatters: [LengthLimitingTextInputFormatter(5)],
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(5),
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d\.]')),
+                  SinglePeriodEnforcer()
+                  // SinglePeriodEnforcer(),
+                ],
                 keyboardType: TextInputType.number,
                 onChanged: (newValue) {
                   if (newValue.isEmpty) {
@@ -159,152 +190,6 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class DummyCourseWidget extends StatefulWidget {
-  const DummyCourseWidget({
-    super.key,
-    required this.courseName,
-    required this.credits,
-    required this.grade,
-  });
-
-  final String courseName;
-  final double credits;
-  final String grade;
-
-  @override
-  State<DummyCourseWidget> createState() => _DummyCourseWidgetState();
-}
-
-class _DummyCourseWidgetState extends State<DummyCourseWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _slideController =
-      AnimationController(vsync: this, duration: Duration(milliseconds: 500));
-  late AnimationController _sizeController =
-      AnimationController(vsync: this, duration: Duration(milliseconds: 200));
-
-  @override
-  void initState() {
-    super.initState();
-    _slideController.forward().whenComplete(() => _sizeController.forward());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final creditsString = widget.credits.toString() == '0.0'
-        ? ''
-        : widget.credits.toString().replaceAll(Constants.regex, '');
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 0),
-        end: const Offset(-1.1, 0),
-      ).animate(CurvedAnimation(
-        parent: _slideController,
-        curve: Curves.ease,
-      )),
-      child: SizeTransition(
-        sizeFactor: Tween<double>(begin: 1, end: 0).animate(
-          CurvedAnimation(
-            parent: _sizeController,
-            curve: Curves.ease,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 5,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 5),
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Theme.of(context).inputDecorationTheme.fillColor,
-                    ),
-                    child: _textWidget(text: widget.courseName),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5),
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Theme.of(context).inputDecorationTheme.fillColor,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _textWidget(text: widget.grade),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Icon(
-                            Icons.arrow_drop_down,
-                            color: Theme.of(context)
-                                .dropdownMenuTheme
-                                .inputDecorationTheme!
-                                .iconColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Theme.of(context).inputDecorationTheme.fillColor,
-                    ),
-                    child: _textWidget(text: creditsString),
-                  ),
-                ),
-              ),
-              const Expanded(
-                child: Icon(
-                  Icons.close,
-                  color: Color.fromARGB(255, 143, 143, 143),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _textWidget extends StatelessWidget {
-  const _textWidget({
-    required this.text,
-  });
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
       ),
     );
   }

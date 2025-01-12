@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
-import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 final gradeToScaleStreamProvider = StreamProvider<List<GradeToScale>>(
@@ -64,7 +64,14 @@ class GradeToScaleController extends AsyncNotifier<List<GradeToScale>> {
     await _gradeToNumberRepository.updateValue(state.value!);
   }
 
-  Future<void> updateLocalMap(int index, GradeToScale gradeToScale) async {
-    state = state..value![index] = gradeToScale;
+  void updateLocalMap(int index, GradeToScale gradeToScale) {
+    final newList = List<GradeToScale>.from(state.value!);
+    newList[index] = gradeToScale;
+    state = AsyncValue.data(newList);
+  }
+
+  Future<void> resetRemoteMap(List<GradeToScale> list) async {
+    state = AsyncValue.data(list);
+    await _gradeToNumberRepository.reset(list);
   }
 }

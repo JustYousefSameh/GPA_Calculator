@@ -1,13 +1,10 @@
 import 'dart:convert';
 
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:gpa_calculator/models/course_model.dart';
 import 'package:uuid/uuid.dart';
 
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
-@immutable
 class SemsesterModel {
   final String id;
   final List<CourseModel> courses;

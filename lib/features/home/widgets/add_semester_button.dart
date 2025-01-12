@@ -21,7 +21,7 @@ class AddSemesterButton extends ConsumerWidget {
       (_) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 1000),
           curve: Curves.fastOutSlowIn,
         );
       },
@@ -34,11 +34,9 @@ class AddSemesterButton extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8, bottom: 8),
       child: FloatingActionButton(
-          backgroundColor: Theme.of(context).colorScheme.primary,
           child: Icon(
             Icons.add,
             size: 36,
-            color: Theme.of(context).colorScheme.onPrimary,
           ),
           onPressed: () => addSemester(ref)),
     );

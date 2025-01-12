@@ -1,4 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class SmoothSlideSize extends StatelessWidget {
+  const SmoothSlideSize(
+      {super.key, required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(-1.2, 0),
+        end: const Offset(0, 0),
+      ).animate(
+        CurvedAnimation(
+          parent: animation,
+          curve: const Interval(0.5, 1, curve: Curves.ease),
+        ),
+      ),
+      child: SizeTransition(
+        sizeFactor: Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0, 0.5, curve: Curves.ease),
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
 
 void showErrorSnackBar(BuildContext context, String text) {
   ScaffoldMessenger.of(context)
@@ -6,13 +42,14 @@ void showErrorSnackBar(BuildContext context, String text) {
     ..showSnackBar(
       SnackBar(
         elevation: 0,
+        dismissDirection: DismissDirection.vertical,
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         content: Container(
-          height: 75,
+          height: 60,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xffc72c41),
+            color: Theme.of(context).colorScheme.error,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Container(
@@ -21,15 +58,17 @@ void showErrorSnackBar(BuildContext context, String text) {
             width: double.infinity,
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.error_outline,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onError,
                 ),
                 const SizedBox(width: 5),
                 Flexible(
                   child: Text(
                     text,
                     maxLines: 3,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.onError),
                     overflow: TextOverflow.visible,
                   ),
                 ),
@@ -80,4 +119,19 @@ void showSuccessSnackBar(BuildContext context, String text) {
         ),
       ),
     );
+}
+
+class SinglePeriodEnforcer extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final newText = newValue.text;
+    // Allow only one period
+    if ('.'.allMatches(newText).length <= 1) {
+      return newValue;
+    }
+    return oldValue;
+  }
 }

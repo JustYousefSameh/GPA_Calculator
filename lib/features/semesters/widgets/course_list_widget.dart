@@ -30,17 +30,28 @@ class CourseList extends ConsumerWidget {
           itemBuilder: (context, index, animation) {
             return SlideTransition(
               position: Tween<Offset>(
-                begin: const Offset(-1, 0),
+                begin: const Offset(-1.2, 0),
                 end: const Offset(0, 0),
               ).animate(
                 CurvedAnimation(
                   parent: animation,
-                  curve: Curves.ease,
+                  curve: const Interval(0.5, 1, curve: Curves.ease),
                 ),
               ),
-              child: CourseWidget(
-                semesterIndex: semesterIndex,
-                courseIndex: index,
+              child: SizeTransition(
+                sizeFactor: Tween<double>(
+                  begin: 0,
+                  end: 1,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animation,
+                    curve: const Interval(0, 0.5, curve: Curves.ease),
+                  ),
+                ),
+                child: CourseWidget(
+                  semesterIndex: semesterIndex,
+                  courseIndex: index,
+                ),
               ),
             );
           },
@@ -79,23 +90,14 @@ class AddCourseButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(semesterControllerProvider.notifier);
-    return FilledButton(
-      style: FilledButton.styleFrom(
-        // minimumSize: Size(100, 35),
-        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        padding: EdgeInsets.symmetric(horizontal: 12),
-      ),
+    return FilledButton.icon(
+      label: Text('Add Course'),
+      icon: Icon(Icons.add),
       onPressed: () {
         listKey.currentState!.insertItem(semsesterModel.courses.length,
             duration: const Duration(milliseconds: 600));
         controller.addCourse(semesterIndex);
       },
-      child: Row(
-        children: [
-          Icon(Icons.add),
-          Text('Add Course'),
-        ],
-      ),
     );
   }
 }
@@ -112,13 +114,14 @@ class SemesterGPA extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final courseList = passedCourseList ??
-        ref.watch(semesterControllerProvider).value![semesterIndex].courses;
-    final gpaProvider = ref.watch(semesterGPAProvider(courseList));
+    // final courseList = passedCourseList ??
+    //     ref.watch(semesterControllerProvider).value![semesterIndex].courses;
+    final gpaProvider = ref.watch(semesterGPAProvider(semesterIndex));
+    print(gpaProvider);
     final double gpa = switch (gpaProvider) {
       AsyncData(:final value) => value,
       AsyncLoading(:final value) => value ?? 0,
-      AsyncError() => 0,
+      AsyncError() => throw StateError("Can't calculate GPA"),
       final v => throw StateError('what is $v'),
     };
     return SizedBox(

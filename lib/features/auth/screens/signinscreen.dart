@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,7 +23,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       validationMode = AutovalidateMode.disabled;
     });
     _formKey.currentState?.reset();
-    context.go('/signup');
+    context.push('/signup');
   }
 
   void signInWithEmailAndPassword(
@@ -37,6 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
   AutovalidateMode validationMode = AutovalidateMode.disabled;
+  var obscureText = true;
 
   @override
   void dispose() {
@@ -49,7 +51,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       body: LayoutBuilder(
         builder: (context, constraints) => SingleChildScrollView(
           child: GestureDetector(
@@ -81,79 +82,92 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 40),
-                        Form(
-                          autovalidateMode: validationMode,
-                          key: _formKey,
-                          child: Column(
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Email',
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 15,
+                        AutofillGroup(
+                          child: Form(
+                            autovalidateMode: validationMode,
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Email',
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 15,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 5),
-                              TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                          r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
-                                      .hasMatch(value)) {
-                                    return 'Please enter a valid email address';
-                                  }
-                                  return null;
-                                },
-                                controller: emailTextController,
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  suffixIcon: const Icon(Icons.email_outlined),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                const SizedBox(height: 5),
+                                TextFormField(
+                                  autofillHints: const [AutofillHints.email],
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your email';
+                                    }
+                                    if (!RegExp(
+                                            r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
+                                        .hasMatch(value)) {
+                                      return 'Please enter a valid email address';
+                                    }
+                                    return null;
+                                  },
+                                  controller: emailTextController,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    suffixIcon:
+                                        const Icon(Icons.email_outlined),
+                                    // border: OutlineInputBorder(
+                                    //   borderRadius: BorderRadius.circular(10),
+                                    // ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Password',
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 15,
+                                const SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Password',
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 15,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 5),
-                              TextFormField(
-                                obscureText: true,
-                                enableSuggestions: false,
-                                autocorrect: false,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  return null;
-                                },
-                                controller: passwordTextController,
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  suffixIcon: const Icon(Icons.lock),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                const SizedBox(height: 5),
+                                TextFormField(
+                                  autofillHints: const [AutofillHints.password],
+                                  obscureText: obscureText,
+                                  enableSuggestions: false,
+                                  autocorrect: false,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your password';
+                                    }
+                                    if (value.length < 6) {
+                                      return 'Password must be at least 6 characters';
+                                    }
+                                    return null;
+                                  },
+                                  controller: passwordTextController,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            obscureText = !obscureText;
+                                          });
+                                        },
+                                        icon: obscureText
+                                            ? const Icon(Icons.visibility_off)
+                                            : const Icon(Icons.visibility)),
+                                    // border: OutlineInputBorder(
+                                    //   borderRadius: BorderRadius.circular(10),
+                                    // ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -173,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 50),
                         FilledButton(
                           style: FilledButton.styleFrom(
-                              minimumSize: Size.fromHeight(50)),
+                              minimumSize: const Size.fromHeight(50)),
                           onPressed: () {
                             FocusManager.instance.primaryFocus?.unfocus();
 
@@ -184,6 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 emailTextController.text,
                                 passwordTextController.text,
                               );
+                              TextInput.finishAutofillContext();
                             } else {
                               setState(() {
                                 validationMode = AutovalidateMode.always;

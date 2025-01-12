@@ -4,7 +4,9 @@ import 'package:gpa_calculator/features/semesters/controller/semester_controller
 import 'package:gpa_calculator/models/course_model.dart';
 
 final semesterGPAProvider =
-    FutureProvider.family<double, List<CourseModel>>((ref, courseList) async {
+    FutureProvider.family<double, int>((ref, semesterIndex) async {
+  final courseList =
+      ref.watch(semesterControllerProvider).value![semesterIndex].courses;
   ref.watch(semesterControllerProvider);
   final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
 

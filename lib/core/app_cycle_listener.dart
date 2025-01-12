@@ -5,12 +5,12 @@ import 'package:gpa_calculator/features/semesters/controller/gradetoscale_contro
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 
 final appLifeCycleListenerProvider = Provider<AppLifecycleListener>((ref) {
-  final isSignedIn = ref.watch(userIDProvider);
+  final isSignedIn = ref.watch(authStateChangeProvider).unwrapPrevious().valueOrNull;
   return AppLifecycleListener(
-    onStateChange: (value) => debugPrint(value.toString()),
+
     onDetach: () async {
       if (isSignedIn == null) return;
-      debugPrint('App Detached Updated Database');
+     
       await ref
           .read(semesterControllerProvider.notifier)
           .updateRemoteDatabase();
@@ -19,7 +19,7 @@ final appLifeCycleListenerProvider = Provider<AppLifecycleListener>((ref) {
     onInactive: () async {
       if (isSignedIn == null) return;
 
-      debugPrint('App Inactive Updated Database');
+    
       await ref
           .read(semesterControllerProvider.notifier)
           .updateRemoteDatabase();

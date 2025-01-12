@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gpa_calculator/core/common/splash.dart';
@@ -7,14 +8,19 @@ import 'package:gpa_calculator/features/auth/screens/signinscreen.dart';
 import 'package:gpa_calculator/features/auth/screens/signupscreen.dart';
 import 'package:gpa_calculator/features/home/screens/homescreen.dart';
 import 'package:gpa_calculator/features/settings/screens/settingsscreen.dart';
+import 'package:gpa_calculator/features/settings/widgets/custom_gpa.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
+
+GoRouter? _previousRouter;
 
 final routerProvider = Provider(
   (ref) {
-    final userModel = ref.watch(userIDProvider);
-
-    return GoRouter(
+    final userModel = ref.watch(authStateChangeProvider).valueOrNull;
+    return _previousRouter = GoRouter(
       debugLogDiagnostics: true,
-      initialLocation: '/',
+      // navigatorKey: navigatorKey,
+      initialLocation: _previousRouter?.state?.fullPath,
       redirect: (context, state) {
         if (userModel == null &&
             state.uri.toString() != '/login' &&
@@ -58,6 +64,12 @@ final routerProvider = Provider(
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsScreen(),
+          routes: [
+            GoRoute(
+              path: 'customGPA',
+              builder: (context, state) => const CustomGPA(),
+            ),
+          ],
         ),
       ],
     );

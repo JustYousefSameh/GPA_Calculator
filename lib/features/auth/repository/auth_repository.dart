@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gpa_calculator/core/failure.dart';
+import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
-import 'package:gpa_calculator/logic/firebase_providers.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 
 final authRepositoryProvider = Provider(
@@ -39,7 +39,7 @@ class AuthRepository {
 
   CollectionReference get _users => _firestore.collection('users');
 
-  Stream<User?> get authStateChange => _auth.authStateChanges();
+  Stream<User?> get authStateChange => _auth.userChanges();
 
   Future<void> setDefaults(String uid) async {
     await _semesterRepository.addSemesterUsingID(uid);
@@ -58,6 +58,7 @@ class AuthRepository {
       );
 
       await userCredential.user?.updateDisplayName(userName);
+      // await _auth.userChanges().first;
 
       final userModel = UserModel(
         name: userName,
@@ -157,12 +158,23 @@ class AuthRepository {
         );
   }
 
+  Future<Either<Failure, Unit>> deleteAccount() async {
+    try {
+      if (await _googleSignIn.isSignedIn()) await _googleSignIn.signOut();
+      await _auth.currentUser?.delete();
+      await _firestore.collection('users').doc(_auth.currentUser!.uid).delete();
+      return right(unit);
+    } on FirebaseAuthException catch (e) {
+      return left(Failure(e.message!));
+    }
+  }
+
   Future<void> forgotPassword(String emailAddress) async {
     await _auth.sendPasswordResetEmail(email: emailAddress);
   }
 
   Future<void> logOut() async {
     await _auth.signOut();
-    if (await _googleSignIn.isSignedIn()) await _googleSignIn.disconnect();
+    if (await _googleSignIn.isSignedIn()) await _googleSignIn.signOut();
   }
 }

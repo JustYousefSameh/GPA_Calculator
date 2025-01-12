@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/utils.dart';
@@ -9,31 +7,27 @@ import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:gpa_calculator/models/user_model.dart';
 
 final userIDProvider = StateProvider<String?>((ref) {
-  final user = ref.watch(authStateChangeProvider).asData?.value;
+  final user = ref.watch(authStateChangeProvider).unwrapPrevious().valueOrNull;
+  print(user?.uid);
   return user?.uid;
 });
 
-final authControllerProvider = StateNotifierProvider<AuthController, bool>(
-  (ref) => AuthController(
-    authRepository: ref.watch(authRepositoryProvider),
-  ),
+final authControllerProvider = NotifierProvider<AuthController, bool>(
+  () => AuthController(),
 );
 
 final authStateChangeProvider = StreamProvider((ref) {
-  return ref.watch(authControllerProvider.notifier).authStateChange;
+  return ref.watch(authRepositoryProvider).authStateChange;
 });
 
-final getUserDataProvider = StreamProvider.family((ref, String uid) {
-  final authController = ref.read(authControllerProvider.notifier);
-  return authController.getUserData(uid);
-});
+class AuthController extends Notifier<bool> {
+  @override
+  bool build() {
+    return false;
+  }
 
-class AuthController extends StateNotifier<bool> {
-  AuthController({required AuthRepository authRepository})
-      : _authRepository = authRepository,
-        super(false);
-  final AuthRepository _authRepository;
-  Stream<User?> get authStateChange => _authRepository.authStateChange;
+  late final AuthRepository _authRepository = ref.watch(authRepositoryProvider);
+  // Stream<User?> get authStateChange => _authRepository.authStateChange;
 
   Future<void> signInWithGoogle(BuildContext context) async {
     state = true;
@@ -74,7 +68,6 @@ class AuthController extends StateNotifier<bool> {
       emailAddress,
       password,
     );
-    await FirebaseAnalytics.instance.logLogin(loginMethod: "email");
 
     state = false;
     user.fold(
@@ -83,12 +76,22 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
+  Future<void> deleteAccount() async {
+    await _authRepository.deleteAccount();
+  }
+
   Stream<UserModel> getUserData(String uid) {
     return _authRepository.getUserData(uid);
   }
 
   Future<void> logout() async {
     await _authRepository.logOut();
+    // ref.invalidate(semesterStreamProvider);
+    // ref.invalidate(gradeToScaleStreamProvider);
+    /*  ref.invalidate(authStateChangeProvider);
+    ref.invalidate(gpaStateProvider);
+    ref.invalidate(userIDProvider);
+    ref.invalidate(userDocProvider)  */
   }
 
   Future<void> forgotPassword(String emailAddress) async {

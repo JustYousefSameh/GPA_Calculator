@@ -15,6 +15,7 @@ class SignInButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50),
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       label: Text(

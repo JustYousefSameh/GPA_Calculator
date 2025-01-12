@@ -1,48 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gpa_calculator/core/theme_provider.dart';
 import 'package:gpa_calculator/features/semesters/controller/user_doc_controller.dart';
 
 import '../widgets/cumlative_gpa.dart';
 import '../widgets/semester_with_button.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void didChangeDependencies() {
+    //Caching the userDocProvider so it loads quickly in the settings page. I am not sure if this is the correct place tho
     ref.read(userDocProvider);
-    final theme = ref.watch(themeControllerProvider);
+    super.didChangeDependencies();
+  }
 
-    var brightness = View.of(context).platformDispatcher.platformBrightness;
-    bool isDarkMode = brightness == Brightness.dark;
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              (theme == ThemeMode.system && isDarkMode) ||
-                      theme == ThemeMode.dark
-                  ? 'assets/icons/GPA_LIGHT.svg'
-                  : 'assets/icons/GPA_DARK.svg',
-              height: 24,
-            ),
-            Text(
-              "PA Calculator",
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    fontSize: 31,
-                    fontWeight: FontWeight.w500,
-                    color: (theme == ThemeMode.system && isDarkMode) ||
-                            theme == ThemeMode.dark
-                        ? Colors.white
-                        : Colors.black,
-                  ),
-            ),
-          ],
+        title: Text(
+          "GPA Calculator",
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontSize: 31,
+                fontWeight: FontWeight.w500,
+              ),
         ),
         actions: [
           IconButton(
@@ -57,9 +45,7 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           children: [
             Expanded(child: SemesterWithButton()),
-            const Divider(
-              height: 1,
-            ),
+            const Divider(height: 1),
             const CumlativeGPA()
           ],
         ),

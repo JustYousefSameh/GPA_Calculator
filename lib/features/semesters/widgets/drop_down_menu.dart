@@ -23,7 +23,7 @@ class GPADropdown extends ConsumerWidget {
     };
     return DropdownButtonFormField<String>(
       decoration: const InputDecoration(
-        contentPadding: EdgeInsets.zero,
+        contentPadding: EdgeInsets.symmetric(vertical: 12),
       ),
       //This is important to make sure the selected grades are present in the provider
       value: selectedValue.isEmpty ||

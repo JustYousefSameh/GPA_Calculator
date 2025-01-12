@@ -3,10 +3,7 @@ import 'package:gpa_calculator/models/grade_scale_model.dart';
 class Constants {
   static const googlePath = 'assets/images/google.png';
 
-  static const avatarDefault =
-      'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-
-  static RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
+  static RegExp regex = RegExp(r'([.]*0)');
 
   static const gradeScale = [
     GradeToScale(isEnabled: true, map: {"A+": 4.3}),

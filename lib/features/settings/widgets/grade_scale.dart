@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
 
@@ -21,27 +22,29 @@ class GradeScaleWidget extends ConsumerStatefulWidget {
 
 class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
   final gradeScaleTextController = TextEditingController();
-  final focusNode = FocusNode();
-  late bool isEnabled;
+
+  String removeDecimalZeroFormat(double n) {
+    RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
+    return n.toString().replaceAll(regex, '');
+  }
 
   @override
   void initState() {
-    isEnabled = widget.gradeToScale.isEnabled;
     super.initState();
   }
 
   @override
   void dispose() {
-    focusNode.dispose();
     gradeScaleTextController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = widget.gradeToScale.isEnabled;
+
     final map = widget.gradeToScale.map.entries.first;
-    gradeScaleTextController.text =
-        map.value.toString().replaceAll(Constants.regex, '');
+    gradeScaleTextController.text = removeDecimalZeroFormat(map.value);
     final controller = ref.read(gradeToScaleProvider.notifier);
 
     void updateLocal({bool? isEnabled}) {
@@ -59,7 +62,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -77,11 +80,14 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
-                focusNode: focusNode,
                 enabled: isEnabled,
-                inputFormatters: [LengthLimitingTextInputFormatter(5)],
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(5),
+                  FilteringTextInputFormatter.allow(RegExp(r'[\d\.]')),
+                  SinglePeriodEnforcer()
+                ],
                 keyboardType: TextInputType.number,
                 onChanged: (newValue) {
                   if (newValue.isEmpty) {
@@ -102,19 +108,19 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
                 },
                 controller: gradeScaleTextController,
                 textAlign: TextAlign.center,
-                decoration: InputDecoration(contentPadding: EdgeInsets.zero),
+                // decoration:
+                //     const InputDecoration(contentPadding: EdgeInsets.zero),
               ),
             ),
           ),
           Expanded(
             child: Center(
               child: IconButton(
-                icon: Icon(isEnabled ? Icons.visibility : Icons.visibility_off),
+                icon: isEnabled
+                    ? Icon(Icons.visibility)
+                    : Icon(Icons.visibility_off),
                 onPressed: () {
-                  setState(() {
-                    isEnabled = !isEnabled;
-                  });
-                  updateLocal(isEnabled: isEnabled);
+                  updateLocal(isEnabled: !isEnabled);
                 },
               ),
             ),

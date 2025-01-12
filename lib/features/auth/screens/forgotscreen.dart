@@ -93,8 +93,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 ),
                 const SizedBox(height: 10),
                 FilledButton(
-                  style:
-                      FilledButton.styleFrom(minimumSize: Size.fromHeight(50)),
+                  style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50)),
                   onPressed: () {
                     setState(() {
                       autoValidate = AutovalidateMode.always;

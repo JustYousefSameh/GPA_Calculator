@@ -24,7 +24,7 @@ class CumlativeGPA extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Credits Total",
+                "Total Credits",
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       fontSize: 18,
                     ),

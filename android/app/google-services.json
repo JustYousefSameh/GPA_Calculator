@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "1019690643363",
     "project_id": "gpa-calculator-4eb7b",
-    "storage_bucket": "gpa-calculator-4eb7b.appspot.com"
+    "storage_bucket": "gpa-calculator-4eb7b.firebasestorage.app"
   },
   "client": [
     {
@@ -19,6 +19,14 @@
           "android_info": {
             "package_name": "com.p0wer.gpa_calculator",
             "certificate_hash": "8418de4eb834bc564e11e93537fba10ad0e02809"
+          }
+        },
+        {
+          "client_id": "1019690643363-n84bmiueqtf7offl64836vep5m8pdluh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.p0wer.gpa_calculator",
+            "certificate_hash": "03c4964e3f16018b0029b9b9fe3bd70831f1e078"
           }
         },
         {
