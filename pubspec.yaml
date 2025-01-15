@@ -30,12 +30,14 @@ dependencies:
   shared_preferences: ^2.2.2
   transparent_image: ^2.0.1
   uuid: ^4.0.0
-  riverpod_generator: ^2.6.4
+  riverpod_annotation: ^2.6.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0
   custom_lint: ^0.7.0
+  build_runner:
   riverpod_lint: ^2.3.10
+  riverpod_generator: ^2.6.4
   flutter_test:
     sdk: flutter
 

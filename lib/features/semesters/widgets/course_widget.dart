@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
 import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/drop_down_menu.dart';
 import 'package:gpa_calculator/features/semesters/widgets/dummy_widgets.dart';
+import 'package:gpa_calculator/models/course_model.dart';
 
 class CourseWidget extends ConsumerStatefulWidget {
   const CourseWidget({
@@ -25,6 +25,10 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
   final nameController = TextEditingController();
   final creditController = TextEditingController();
 
+  late final controller = ref.read(semesterControllerProvider.notifier);
+
+  late CourseModel courseModel;
+
   @override
   void dispose() {
     nameController.dispose();
@@ -32,79 +36,100 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
     super.dispose();
   }
 
+  int? creditCursorPosition;
+  int? nameCursorPosition;
+
+  String? lastCreditText;
+
+  Future<void> updateCourseModel({String? grade}) async {
+    lastCreditText = creditController.text;
+    //Cache the cursor posotions
+    nameCursorPosition = nameController.selection.baseOffset;
+    creditCursorPosition = creditController.selection.baseOffset;
+
+    controller.updateCourse(
+      widget.semesterIndex,
+      widget.courseIndex,
+      courseModel.copyWith(
+        courseName: nameController.text,
+        credits: creditController.text.isEmpty
+            ? Wrapped.value(null)
+            : Wrapped.value(double.parse(creditController.text)),
+        grade: grade,
+      ),
+    );
+  }
+
+  void deleteCourse() {
+    AnimatedList.of(context).removeItem(
+      widget.courseIndex,
+      (context, animation) {
+        return SmoothSlideSize(
+            animation: animation,
+            child: DummyCourseWidget(
+              courseName: courseModel.courseName,
+              grade: courseModel.grade,
+              credits: courseModel.credits,
+            ));
+
+        // SlideTransition(
+        //   position: Tween<Offset>(
+        //     begin: const Offset(-1.2, 0),
+        //     end: const Offset(0, 0),
+        //   ).animate(
+        //     CurvedAnimation(
+        //       parent: animation,
+        //       curve: const Interval(0.5, 1, curve: Curves.ease),
+        //     ),
+        //   ),
+        //   child: SizeTransition(
+        //     sizeFactor: Tween<double>(
+        //       begin: 0,
+        //       end: 1,
+        //     ).animate(
+        //       CurvedAnimation(
+        //         parent: animation,
+        //         curve: const Interval(0, 0.5, curve: Curves.ease),
+        //       ),
+        //     ),
+        //     child:,
+        //   ),
+        // );
+      },
+      duration: const Duration(milliseconds: 700),
+    );
+
+    controller.deleteCourse(widget.semesterIndex, widget.courseIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = ref.read(semesterControllerProvider.notifier);
+    courseModel = ref.watch(semesterControllerProvider.select((value) =>
+        value.value![widget.semesterIndex].courses[widget.courseIndex]));
 
-    final courseModel = ref
-        .watch(semesterControllerProvider)
-        .value![widget.semesterIndex]
-        .courses[widget.courseIndex];
+    nameController.text = courseModel.courseName;
 
-    nameController
-      ..text = courseModel.courseName
-      ..selection = TextSelection(
-        baseOffset: nameController.text.length,
-        extentOffset: nameController.text.length,
-      );
-
-    creditController
-      ..text = courseModel.credits.toString() == '0.0'
-          ? ''
-          : courseModel.credits.toString().replaceAll(Constants.regex, '')
-      ..selection = TextSelection(
-        baseOffset: creditController.text.length,
-        extentOffset: creditController.text.length,
-      );
-
-    Future<void> updateCourseModel({String? grade}) async {
-      controller.updateCourse(
-        widget.semesterIndex,
-        widget.courseIndex,
-        courseModel.copyWith(
-          courseName: nameController.text,
-          credits: creditController.text.isEmpty
-              ? 0.0
-              : double.parse(creditController.text),
-          grade: grade,
-        ),
+    if (nameCursorPosition != null) {
+      nameCursorPosition = nameCursorPosition! > nameController.text.length
+          ? nameController.text.length
+          : nameCursorPosition;
+      nameController.selection = TextSelection.fromPosition(
+        TextPosition(offset: nameCursorPosition ?? nameController.text.length),
       );
     }
 
-    void deleteCourse() {
-      controller.deleteCourse(widget.semesterIndex, widget.courseIndex);
-      AnimatedList.of(context).removeItem(
-        widget.courseIndex,
-        (context, animation) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(-1.2, 0),
-              end: const Offset(0, 0),
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: const Interval(0.5, 1, curve: Curves.ease),
-              ),
-            ),
-            child: SizeTransition(
-              sizeFactor: Tween<double>(
-                begin: 0,
-                end: 1,
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: const Interval(0, 0.5, curve: Curves.ease),
-                ),
-              ),
-              child: DummyCourseWidget(
-                courseName: courseModel.courseName,
-                grade: courseModel.grade,
-                credits: courseModel.credits,
-              ),
-            ),
-          );
-        },
-        duration: const Duration(milliseconds: 700),
+    creditController.text = lastCreditText ??
+        (courseModel.credits == null ? '' : courseModel.credits.toString());
+
+    if (creditCursorPosition != null) {
+      creditCursorPosition =
+          creditCursorPosition! > creditController.text.length
+              ? creditController.text.length
+              : creditCursorPosition;
+
+      creditController.selection = TextSelection.fromPosition(
+        TextPosition(
+            offset: creditCursorPosition ?? creditController.text.length),
       );
     }
 
@@ -153,26 +178,27 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
                   LengthLimitingTextInputFormatter(5),
                   FilteringTextInputFormatter.allow(RegExp(r'[\d\.]')),
                   SinglePeriodEnforcer()
-                  // SinglePeriodEnforcer(),
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (newValue) {
-                  if (newValue.isEmpty) {
-                    updateCourseModel();
-                    return;
-                  }
-                  final newValueAfterregex = double.parse(newValue)
-                      .toString()
-                      .replaceAll(Constants.regex, '');
+                  updateCourseModel();
+                  return;
+                  // if (newValue.isEmpty) {
+                  //   updateCourseModel();
+                  //   return;
+                  // }
+                  // final newValueAfterregex = double.parse(newValue)
+                  //     .toString()
+                  //     .replaceAll(Constants.regex, '');
 
-                  final value = courseModel.credits
-                      .toString()
-                      .replaceAll(Constants.regex, '');
+                  // final value = courseModel.credits
+                  //     .toString()
+                  //     .replaceAll(Constants.regex, '');
 
-                  if (newValueAfterregex != value &&
-                      newValue.substring(newValue.length - 1) != '.') {
-                    updateCourseModel();
-                  }
+                  // if (newValueAfterregex != value &&
+                  //     newValue.substring(newValue.length - 1) != '.') {
+                  //   updateCourseModel();
+                  // }
                 },
               ),
             ),

@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GPA_Calculator (Flutter)",
+            "program": "lib/main.dart",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "GPA_Calculator (Flutter RMX3867)",
+            "program": "lib/main.dart",
+            "deviceId": "192.168.0.102:41931",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}

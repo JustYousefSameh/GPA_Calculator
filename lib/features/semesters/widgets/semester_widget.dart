@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/utils.dart';
+import 'package:gpa_calculator/features/home/controllers/gpa_provider.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/course_list_widget.dart';
 import 'package:gpa_calculator/features/semesters/widgets/dummy_widgets.dart';
@@ -17,14 +18,15 @@ class SemesterWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     //Using ref.read() instead of ref.watch() because for some reason it ruins the animations of aniamted list
     final semesterModel =
-        ref.watch(semesterControllerProvider).value![semesterIndex];
+        ref.read(semesterControllerProvider).value?[semesterIndex];
 
-    print(ref.read(semesterControllerProvider));
-
-    void deleteSemester() {
+    void deleteSemester() async {
       final semesterModelBeforeDelete =
           ref.read(semesterControllerProvider).value![semesterIndex];
 
+      final gpa = await ref.read(semesterGPAProvider(semesterIndex).future);
+
+      // ignore: use_build_context_synchronously
       AnimatedList.of(context).removeItem(
         semesterIndex,
         (context, animation) => SmoothSlideSize(
@@ -32,6 +34,7 @@ class SemesterWidget extends ConsumerWidget {
           child: DummySemesterWidget(
             semesterIndex: semesterIndex,
             semesterModel: semesterModelBeforeDelete,
+            gpa: gpa,
           ),
         ),
         duration: const Duration(milliseconds: 700),
@@ -39,7 +42,7 @@ class SemesterWidget extends ConsumerWidget {
 
       ref
           .read(semesterControllerProvider.notifier)
-          .deleteSemester(semesterModel.id);
+          .deleteSemester(semesterModel!.id);
     }
 
     return Padding(

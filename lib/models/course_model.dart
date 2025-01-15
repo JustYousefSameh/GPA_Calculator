@@ -1,12 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:gpa_calculator/core/utils.dart';
 import 'package:uuid/uuid.dart';
 
 class CourseModel {
   final String courseName;
   final String grade;
-  final double credits;
+  final double? credits;
   final String id;
 
   const CourseModel({
@@ -19,20 +20,20 @@ class CourseModel {
   factory CourseModel.empty() => CourseModel(
         courseName: '',
         grade: '',
-        credits: 0.0,
+        credits: null,
         id: const Uuid().v1(),
       );
 
   CourseModel copyWith({
     String? courseName,
     String? grade,
-    double? credits,
+    Wrapped<double?>? credits,
     String? id,
   }) {
     return CourseModel(
       courseName: courseName ?? this.courseName,
       grade: grade ?? this.grade,
-      credits: credits ?? this.credits,
+      credits: credits != null ? credits.value : this.credits,
       id: id ?? this.id,
     );
   }
@@ -50,7 +51,7 @@ class CourseModel {
     return CourseModel(
       courseName: map['courseName'] as String,
       grade: map['grade'] as String,
-      credits: map['credits'] as double,
+      credits: map['credits']?.toDouble(),
       id: map['id'] as String,
     );
   }

@@ -11,7 +11,7 @@ class CumlativeGPA extends ConsumerWidget {
 
     final List<double> gpaValues = switch (controller) {
       AsyncData(:final value) => value,
-      AsyncError() => throw StateError("Couldn't load GPA"),
+      AsyncError(:final error) => throw StateError(error.toString()),
       AsyncLoading(:final value) => value ?? [0, 0],
       final v => throw StateError('what is $v'),
     };

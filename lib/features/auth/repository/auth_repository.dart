@@ -8,15 +8,19 @@ import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/models/user_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final authRepositoryProvider = Provider(
-  (ref) => AuthRepository(
+part 'auth_repository.g.dart';
+
+@riverpod
+AuthRepository authRepository(Ref ref) {
+  return AuthRepository(
       firestore: ref.read(firestoreProvider),
       auth: ref.read(authProvider),
       googleSignIn: ref.read(googleSignInProvider),
       semesterRepository: ref.read(semestersRepositoryProvider),
-      gradeToNumberRepository: ref.read(gradeToNumberRepositoryProvider)),
-);
+      gradeToNumberRepository: ref.read(gradeToNumberRepositoryProvider));
+}
 
 class AuthRepository {
   AuthRepository({

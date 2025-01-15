@@ -4,12 +4,17 @@ import 'package:gpa_calculator/core/constants/constants.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final gradeToNumberRepositoryProvider =
-    Provider<GradeToScaleRepository>((ref) => GradeToScaleRepository(
-          ref: ref,
-          fireStore: ref.read(firestoreProvider),
-        ));
+part 'gradetonumber_repository.g.dart';
+
+@riverpod
+GradeToScaleRepository gradeToNumberRepository(Ref ref) {
+  return GradeToScaleRepository(
+    ref: ref,
+    fireStore: ref.watch(firestoreProvider),
+  );
+}
 
 class GradeToScaleRepository {
   GradeToScaleRepository(

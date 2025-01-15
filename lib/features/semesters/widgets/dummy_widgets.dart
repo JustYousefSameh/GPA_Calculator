@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
-import 'package:gpa_calculator/features/semesters/widgets/course_list_widget.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 
@@ -35,12 +34,12 @@ class DummyCourseWidget extends StatelessWidget {
   });
 
   final String courseName;
-  final double credits;
+  final num? credits;
   final String grade;
 
   @override
   Widget build(BuildContext context) {
-    final creditsString = credits.toString() == '0.0'
+    final creditsString = credits == null
         ? ''
         : credits.toString().replaceAll(Constants.regex, '');
     return Padding(
@@ -121,10 +120,12 @@ class DummySemesterWidget extends StatelessWidget {
     super.key,
     required this.semesterIndex,
     required this.semesterModel,
+    required this.gpa,
   });
 
   final int semesterIndex;
   final SemsesterModel semesterModel;
+  final double gpa;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -166,7 +167,7 @@ class DummySemesterWidget extends StatelessWidget {
                     .map(
                       (e) => DummyCourseWidget(
                           courseName: e.courseName,
-                          credits: e.credits,
+                          credits: e.credits?.toDouble(),
                           grade: e.grade),
                     )
                     .toList(),
@@ -187,10 +188,40 @@ class DummySemesterWidget extends StatelessWidget {
                       label: const Text('Add Course'),
                     ),
                   ),
-                  SemesterGPA(
-                    semesterIndex: semesterIndex,
-                    passedCourseList: semesterModel.courses,
-                  ),
+                  SizedBox(
+                    width: 150,
+                    height: 40,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'GPA : ',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  // color: secondary,
+                                ),
+                          ),
+                          Text(
+                            '$gpa',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ],

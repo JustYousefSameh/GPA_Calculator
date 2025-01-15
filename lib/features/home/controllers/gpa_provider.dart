@@ -2,19 +2,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/models/course_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final semesterGPAProvider =
-    FutureProvider.family<double, int>((ref, semesterIndex) async {
-  final courseList =
-      ref.watch(semesterControllerProvider).value![semesterIndex].courses;
+part 'gpa_provider.g.dart';
+
+@riverpod
+Future<double> semesterGPA(Ref ref, int semesterIndex) async {
+  final semesterList = ref.watch(semesterControllerProvider).value!;
+
+  if (semesterIndex >= semesterList.length) return 0;
+  final courseList = semesterList[semesterIndex].courses;
+
   ref.watch(semesterControllerProvider);
   final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
 
   double getTotalCredit(List<CourseModel> courseModelList) {
     double totalCredit = 0;
     for (var element in courseModelList) {
-      if (element.grade != '') {
-        totalCredit += element.credits;
+      if (element.grade != '' && element.credits != null) {
+        totalCredit += element.credits!;
       }
     }
     return totalCredit;
@@ -23,53 +29,56 @@ final semesterGPAProvider =
   double totalCredit = 0;
   double gradePoints = 0;
   for (var element in courseList) {
-    gradePoints += element.credits * (gradeNumber[element.grade] ?? 0);
+    if (element.credits == null) continue;
+    gradePoints += element.credits! * (gradeNumber[element.grade] ?? 0);
   }
   totalCredit = getTotalCredit(courseList);
   return (gradePoints / totalCredit).isNaN
       ? 0
       : double.parse((gradePoints / totalCredit).toStringAsPrecision(3));
-});
+}
 
-final gpaStateProvider = FutureProvider(
-  (ref) async {
-    double totalGradePoints = 0;
-    double totalCredits = 0;
+@riverpod
+Future<List<double>> gpaState(Ref ref) async {
+  double totalGradePoints = 0;
+  double totalCredits = 0;
 
-    final semesterList = await ref.watch(semesterControllerProvider.future);
-    final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
+  final semesterList = await ref.watch(semesterControllerProvider.future);
+  final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
 
-    double getTotalCredit(List<CourseModel> courseModelList) {
-      double totalCredit = 0;
-      for (var element in courseModelList) {
-        if (element.grade != '') {
-          totalCredit += element.credits;
-        }
+  double getTotalCredit(List<CourseModel> courseModelList) {
+    double totalCredit = 0;
+    for (var element in courseModelList) {
+      if (element.grade != '' && element.credits != null) {
+        totalCredit += element.credits!;
       }
-      return totalCredit;
     }
+    return totalCredit;
+  }
 
-    double getgradePoints(List<CourseModel> courseModelList) {
-      double gradePoints = 0;
-      for (var element in courseModelList) {
-        gradePoints += element.credits * (gradeNumber[element.grade] ?? 0);
-      }
-      return gradePoints;
+  double getgradePoints(List<CourseModel> courseModelList) {
+    double gradePoints = 0;
+    for (var element in courseModelList) {
+      if (element.credits == null) continue;
+      gradePoints += element.credits! * (gradeNumber[element.grade] ?? 0);
     }
+    return gradePoints;
+  }
 
-    for (var semesterModel in semesterList) {
-      totalCredits += getTotalCredit(semesterModel.courses);
-      totalGradePoints += getgradePoints(semesterModel.courses);
-    }
+  for (var semesterModel in semesterList) {
+    totalCredits += getTotalCredit(semesterModel.courses);
+    totalGradePoints += getgradePoints(semesterModel.courses);
+  }
 
-    final result = <double>[
-      ((totalGradePoints / totalCredits).isNaN)
-          ? 0
-          : double.parse(
-              (totalGradePoints / totalCredits).toStringAsPrecision(3)),
-      totalCredits
-    ];
+  totalCredits = double.parse(totalCredits.toStringAsPrecision(3));
 
-    return result;
-  },
-);
+  final result = <double>[
+    ((totalGradePoints / totalCredits).isNaN)
+        ? 0
+        : double.parse(
+            (totalGradePoints / totalCredits).toStringAsPrecision(3)),
+    totalCredits,
+  ];
+
+  return result;
+}

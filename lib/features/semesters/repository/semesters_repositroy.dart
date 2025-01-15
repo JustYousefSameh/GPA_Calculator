@@ -5,10 +5,17 @@ import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final semestersRepositoryProvider = Provider<SemesterRepository>(
-  (ref) => SemesterRepository(firestore: ref.read(firestoreProvider), ref: ref),
-);
+part 'semesters_repositroy.g.dart';
+
+@riverpod
+SemesterRepository semestersRepository(Ref ref) {
+  return SemesterRepository(
+    firestore: ref.watch(firestoreProvider),
+    ref: ref,
+  );
+}
 
 class SemesterRepository {
   SemesterRepository({required FirebaseFirestore firestore, required Ref ref})

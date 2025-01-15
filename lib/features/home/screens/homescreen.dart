@@ -6,23 +6,13 @@ import 'package:gpa_calculator/features/semesters/controller/user_doc_controller
 import '../widgets/cumlative_gpa.dart';
 import '../widgets/semester_with_button.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void didChangeDependencies() {
+  Widget build(BuildContext context, WidgetRef ref) {
     //Caching the userDocProvider so it loads quickly in the settings page. I am not sure if this is the correct place tho
-    ref.read(userDocProvider);
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    ref.watch(userDocProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(

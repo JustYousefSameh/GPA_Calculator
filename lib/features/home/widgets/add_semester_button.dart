@@ -15,7 +15,7 @@ class AddSemesterButton extends ConsumerWidget {
 
   void addSemester(WidgetRef ref) async {
     listKey.currentState!
-        .insertItem(await ref.read(semesterCounterProvider.future));
+        .insertItem((await ref.read(semesterControllerProvider.future)).length);
 
     SchedulerBinding.instance.addPostFrameCallback(
       (_) {

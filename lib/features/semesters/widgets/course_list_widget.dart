@@ -4,7 +4,6 @@ import 'package:gpa_calculator/features/home/controllers/gpa_provider.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/course_widget.dart';
 import 'package:gpa_calculator/models/course_model.dart';
-import 'package:gpa_calculator/models/semester_model.dart';
 
 class CourseList extends ConsumerWidget {
   CourseList({
@@ -18,13 +17,13 @@ class CourseList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final semesterModel =
-        ref.watch(semesterControllerProvider).value![semesterIndex];
+    final coursesCount = ref.watch(semesterControllerProvider
+        .select((value) => value.value![semesterIndex].courses.length));
     return Column(
       children: [
         AnimatedList(
           key: listKey,
-          initialItemCount: semesterModel.courses.length,
+          initialItemCount: coursesCount,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index, animation) {
@@ -62,7 +61,7 @@ class CourseList extends ConsumerWidget {
           children: [
             AddCourseButton(
               listKey: listKey,
-              semsesterModel: semesterModel,
+              couresesCount: coursesCount,
               semesterIndex: semesterIndex,
             ),
             SemesterGPA(
@@ -79,12 +78,12 @@ class AddCourseButton extends ConsumerWidget {
   const AddCourseButton({
     super.key,
     required this.listKey,
-    required this.semsesterModel,
+    required this.couresesCount,
     required this.semesterIndex,
   });
 
   final GlobalKey<AnimatedListState> listKey;
-  final SemsesterModel semsesterModel;
+  final int couresesCount;
   final int semesterIndex;
 
   @override
@@ -94,7 +93,7 @@ class AddCourseButton extends ConsumerWidget {
       label: Text('Add Course'),
       icon: Icon(Icons.add),
       onPressed: () {
-        listKey.currentState!.insertItem(semsesterModel.courses.length,
+        listKey.currentState!.insertItem(couresesCount,
             duration: const Duration(milliseconds: 600));
         controller.addCourse(semesterIndex);
       },
@@ -117,7 +116,6 @@ class SemesterGPA extends ConsumerWidget {
     // final courseList = passedCourseList ??
     //     ref.watch(semesterControllerProvider).value![semesterIndex].courses;
     final gpaProvider = ref.watch(semesterGPAProvider(semesterIndex));
-    print(gpaProvider);
     final double gpa = switch (gpaProvider) {
       AsyncData(:final value) => value,
       AsyncLoading(:final value) => value ?? 0,

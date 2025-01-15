@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/features/settings/widgets/grade_scale.dart';
+import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 class CustomGPA extends ConsumerWidget {
   const CustomGPA({
@@ -18,7 +19,8 @@ class CustomGPA extends ConsumerWidget {
       ),
       body: PopScope(
         onPopInvokedWithResult: (_, __) {
-          ref.read(gradeToScaleProvider.notifier).updateRemoteMap();
+          ref.read(gradeToScaleControllerProvider.notifier).fixLocalMap();
+          ref.read(gradeToScaleControllerProvider.notifier).updateRemoteMap();
         },
         child: SingleChildScrollView(
           child: Padding(
@@ -86,8 +88,9 @@ class CustomGPA extends ConsumerWidget {
                           TextButton(
                               onPressed: () {
                                 ref
-                                    .read(gradeToScaleProvider.notifier)
-                                    .resetRemoteMap(Constants.gradeScale);
+                                    .read(
+                                        gradeToScaleControllerProvider.notifier)
+                                    .resetLocalMap(Constants.gradeScale);
                                 Navigator.pop(context, "Reset");
                               },
                               child: const Text("Reset")),
@@ -116,36 +119,67 @@ class GradeToScaleListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gradeToNumberProvider = ref.watch(gradeToScaleProvider);
+    final gradeToNumberProvider = ref.read(gradeToScaleControllerProvider);
 
-    return switch (gradeToNumberProvider) {
-      AsyncLoading(:final value) => value != null
-          ? ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: value
-                  .mapWithIndex(
-                    (e, index) => GradeScaleWidget(
-                      gradeToScale: e,
-                      index: index,
-                    ),
-                  )
-                  .toList(),
-            )
-          : const Center(child: CircularProgressIndicator()),
-      AsyncError() => const Text("got error"),
-      AsyncValue(:final value) => ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          children: value!
-              .mapWithIndex(
-                (e, index) => GradeScaleWidget(
-                  gradeToScale: e,
-                  index: index,
-                ),
-              )
-              .toList(),
-        ),
+    final List<GradeToScale>? value = switch (gradeToNumberProvider) {
+      AsyncData(:final value) => value,
+      // AsyncError(:final error) => throw StateError(error.toString()),
+      AsyncLoading(:final value) => value,
+      final v => throw StateError('what is $v'),
     };
+
+    if (value == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (gradeToNumberProvider.hasError) {
+      return Center(
+        child: Text("Sorry there was an error."),
+      );
+    }
+
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      children: value
+          .mapWithIndex(
+            (e, index) => GradeScaleWidget(
+              index: index,
+            ),
+          )
+          .toList(),
+    );
+
+    // return switch (gradeToNumberProvider) {
+    //   AsyncLoading(:final value) => value != null
+    //       ? ListView(
+    //           physics: const NeverScrollableScrollPhysics(),
+    //           shrinkWrap: true,
+    //           children: value
+    //               .mapWithIndex(
+    //                 (e, index) => GradeScaleWidget(
+    //                   gradeToScale: e,
+    //                   index: index,
+    //                 ),
+    //               )
+    //               .toList(),
+    //         )
+    //       : const Center(child: CircularProgressIndicator()),
+    //   AsyncError() => const Text("got error"),
+    //   AsyncValue(:final value) => ListView(
+    //       physics: const NeverScrollableScrollPhysics(),
+    //       shrinkWrap: true,
+    //       children: value!
+    //           .mapWithIndex(
+    //             (e, index) => GradeScaleWidget(
+    //               gradeToScale: e,
+    //               index: index,
+    //             ),
+    //           )
+    //           .toList(),
+    //     ),
+    // };
   }
 }

@@ -4,7 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 
-class SemesterListView extends ConsumerWidget {
+class SemesterListView extends ConsumerStatefulWidget {
   const SemesterListView({
     super.key,
     required this.listKey,
@@ -15,7 +15,14 @@ class SemesterListView extends ConsumerWidget {
   final ScrollController scrollController;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SemesterListView> createState() => _SemesterListViewState();
+}
+
+class _SemesterListViewState extends ConsumerState<SemesterListView> {
+  late final Future semesters = ref.read(semesterControllerProvider.future);
+
+  @override
+  Widget build(BuildContext context) {
     final semestersCount = ref.watch(semesterCounterProvider);
 
     Either<int?, Object> value = switch (semestersCount) {
@@ -25,69 +32,45 @@ class SemesterListView extends ConsumerWidget {
       final v => throw StateError('what is $v'),
     };
 
-    print(value);
-
-    return value.fold(
-      (count) {
-        if (count == null) {
-          return Center(
-            child: CircularProgressIndicator(),
+    return FutureBuilder(
+      future: semesters,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return value.fold(
+            (count) {
+              if (count == null) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              return AnimatedList(
+                controller: widget.scrollController,
+                key: widget.listKey,
+                initialItemCount: count,
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemBuilder: (context, index, animation) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(-1.2, 0),
+                      end: const Offset(0, 0),
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.ease,
+                      ),
+                    ),
+                    child: SemesterWidget(semesterIndex: index),
+                  );
+                },
+              );
+            },
+            (error) => Text(error.toString()),
           );
+        } else {
+          return Center(child: CircularProgressIndicator());
         }
-        return AnimatedList(
-          controller: scrollController,
-          key: listKey,
-          initialItemCount: count,
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
-          itemBuilder: (context, index, animation) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(-1.2, 0),
-                end: const Offset(0, 0),
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.ease,
-                ),
-              ),
-              child: SemesterWidget(semesterIndex: index),
-            );
-          },
-        );
       },
-      (error) => Text(error.toString()),
     );
-    // if (value == null)
-    //   return Center(
-    //     child: CircularProgressIndicator(),
-    //   );
-    // return ref.watch(semesterCounterProvider).when(
-    //       data: (data) {
-    //         return AnimatedList(
-    //           controller: scrollController,
-    //           key: listKey,
-    //           initialItemCount: data,
-    //           shrinkWrap: true,
-    //           physics: const ClampingScrollPhysics(),
-    //           itemBuilder: (context, index, animation) {
-    //             return SlideTransition(
-    //               position: Tween<Offset>(
-    //                 begin: const Offset(-1.2, 0),
-    //                 end: const Offset(0, 0),
-    //               ).animate(
-    //                 CurvedAnimation(
-    //                   parent: animation,
-    //                   curve: Curves.ease,
-    //                 ),
-    //               ),
-    //               child: SemesterWidget(semesterIndex: index),
-    //             );
-    //           },
-    //         );
-    //       },
-    //       error: (error, stack) => Text(error.toString()),
-    //       loading: (data) => const Center(child: CircularProgressIndicator()),
-    //     );
   }
 }

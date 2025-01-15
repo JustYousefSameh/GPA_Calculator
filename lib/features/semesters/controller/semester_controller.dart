@@ -3,54 +3,62 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
-import 'package:gpa_calculator/features/semesters/controller/user_doc_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/semesters_repositroy.dart';
 import 'package:gpa_calculator/models/course_model.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class SemesterCounterNotifier extends AsyncNotifier<int> {
+part 'semester_controller.g.dart';
+
+@riverpod
+class SemesterCounter extends _$SemesterCounter {
   @override
   FutureOr<int> build() async {
     final semesterlist = await ref.watch(semesterStreamProvider.future);
     return semesterlist.length;
   }
+
+  addOne() {
+    state = AsyncData(state.asData!.value + 1);
+  }
+
+  removeOne() {
+    state = AsyncData(state.asData!.value - 1);
+  }
 }
 
-final semesterCounterProvider =
-    AsyncNotifierProvider<SemesterCounterNotifier, int>(
-        SemesterCounterNotifier.new);
+// @riverpod
+// FutureOr<int> semesterCounter(Ref ref) async {
+//   final semesterlist = await ref.watch(semesterStreamProvider.future);
+//   return semesterlist.length;
+// }
 
-final semesterStreamProvider = StreamProvider<List<SemsesterModel>>(
-  (ref) async* {
-    final id = ref.watch(userIDProvider);
+@riverpod
+Stream<List<SemsesterModel>> semesterStream(Ref ref) async* {
+  final id = ref.watch(userIDProvider);
 
-    yield* ref
-        .read(firestoreProvider)
-        .collection('users')
-        .doc(id)
-        .collection('data')
-        .doc('semesters')
-        .snapshots()
-        .asyncMap(
-      (event) {
-        if (event.data() == null) return [];
-        return List<SemsesterModel>.from(
-          event.data()!['semesters'].map((e) => SemsesterModel.fromMap(e)),
-        );
-      },
-    );
-  },
-);
+  yield* ref
+      .read(firestoreProvider)
+      .collection('users')
+      .doc(id)
+      .collection('data')
+      .doc('semesters')
+      .snapshots()
+      .asyncMap(
+    (event) {
+      if (event.data() == null) return [];
+      return List<SemsesterModel>.from(
+        event.data()!['semesters'].map((e) => SemsesterModel.fromMap(e)),
+      );
+    },
+  );
+}
 
-class SemesterController
-    extends AutoDisposeAsyncNotifier<List<SemsesterModel>> {
+@riverpod
+class SemesterController extends _$SemesterController {
   @override
   FutureOr<List<SemsesterModel>> build() async {
-    print("In semester controller");
-    print(ref.watch(userDocProvider));
     final value = await ref.watch(semesterStreamProvider.future);
-    print("value of semester stream");
-    print(value);
     return value;
   }
 
@@ -60,12 +68,14 @@ class SemesterController
   void addSemester() {
     final List<SemsesterModel> newList =
         List.from(state.asData!.value..add(SemsesterModel.empty()));
-    ref.read(semesterCounterProvider.notifier).update((p0) => p0 + 1);
+    // ref.read(semesterCounterProvider.notifier).addOne();
+    // ref.read(semesterCounterProvider.).update((p0) => p0 + 1);
     state = AsyncData(newList);
   }
 
   void deleteSemester(String id) async {
-    ref.read(semesterCounterProvider.notifier).update((p0) => p0 - 1);
+    // ref.read(semesterCounterProvider.notifier).update((p0) => p0 - 1);
+    // ref.read(semesterCounterProvider.notifier).removeOne();
     state = AsyncData(List.from(state.value!
       ..remove(
           state.asData!.value.singleWhere((element) => element.id == id))));
@@ -98,7 +108,7 @@ class SemesterController
   }
 }
 
-final semesterControllerProvider =
-    AsyncNotifierProvider.autoDispose<SemesterController, List<SemsesterModel>>(
-  SemesterController.new,
-);
+// final semesterControllerProvider =
+//     AsyncNotifierProvider.autoDispose<SemesterController, List<SemsesterModel>>(
+//   SemesterController.new,
+// );

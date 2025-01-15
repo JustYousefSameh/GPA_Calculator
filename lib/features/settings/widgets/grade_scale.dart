@@ -7,12 +7,12 @@ import 'package:gpa_calculator/features/semesters/controller/gradetoscale_contro
 import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 class GradeScaleWidget extends ConsumerStatefulWidget {
-  final GradeToScale gradeToScale;
+  // final GradeToScale gradeToScale;
   final int index;
 
   const GradeScaleWidget({
     super.key,
-    required this.gradeToScale,
+    // required this.gradeToScale,
     required this.index,
   });
 
@@ -23,14 +23,17 @@ class GradeScaleWidget extends ConsumerStatefulWidget {
 class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
   final gradeScaleTextController = TextEditingController();
 
+  late final GradeToScaleController controller =
+      ref.read(gradeToScaleControllerProvider.notifier);
+
+  int? creditCursorPosition;
+  String? lastGradeScaleText;
+
+  late GradeToScale gradeToScale;
+
   String removeDecimalZeroFormat(double n) {
     RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
     return n.toString().replaceAll(regex, '');
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -39,27 +42,46 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
     super.dispose();
   }
 
+  void updateLocal({bool? isEnabled, bool isEmpty = false}) {
+    lastGradeScaleText = gradeScaleTextController.text;
+    creditCursorPosition = gradeScaleTextController.selection.baseOffset;
+
+    controller.updateLocalMap(
+      widget.index,
+      gradeToScale.copyWith(
+        map: {
+          gradeToScale.map.entries.first.key:
+              gradeScaleTextController.text.isEmpty
+                  ? 0.0
+                  : double.parse(gradeScaleTextController.text)
+        },
+        isEnabled: isEnabled,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isEnabled = widget.gradeToScale.isEnabled;
+    gradeToScale = ref.watch(gradeToScaleControllerProvider
+        .select((value) => value.value![widget.index]));
+    final isEnabled = gradeToScale.isEnabled;
+    final map = gradeToScale.map.entries.first;
 
-    final map = widget.gradeToScale.map.entries.first;
-    gradeScaleTextController.text = removeDecimalZeroFormat(map.value);
-    final controller = ref.read(gradeToScaleProvider.notifier);
-
-    void updateLocal({bool? isEnabled}) {
-      controller.updateLocalMap(
-        widget.index,
-        widget.gradeToScale.copyWith(
-          map: {
-            map.key: gradeScaleTextController.text.isEmpty
-                ? 0.0
-                : double.parse(gradeScaleTextController.text)
-          },
-          isEnabled: isEnabled,
-        ),
-      );
+    if (map.value == Constants.gradeScale[widget.index].map[map.key]) {
+      lastGradeScaleText = null;
     }
+    gradeScaleTextController.text = lastGradeScaleText ?? map.value.toString();
+
+    creditCursorPosition ??= gradeScaleTextController.text.length;
+    creditCursorPosition =
+        creditCursorPosition! > gradeScaleTextController.text.length
+            ? gradeScaleTextController.text.length
+            : creditCursorPosition;
+
+    gradeScaleTextController.selection = TextSelection.fromPosition(
+      TextPosition(
+          offset: creditCursorPosition ?? gradeScaleTextController.text.length),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -81,7 +103,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
+              child: TextFormField(
                 enabled: isEnabled,
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(5),
@@ -91,7 +113,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
                 keyboardType: TextInputType.number,
                 onChanged: (newValue) {
                   if (newValue.isEmpty) {
-                    updateLocal();
+                    updateLocal(isEmpty: true);
                     return;
                   }
                   final newValueAfterregex = double.parse(newValue)

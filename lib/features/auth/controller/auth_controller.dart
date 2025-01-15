@@ -1,26 +1,31 @@
+// ignore_for_file: avoid_build_context_in_providers
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
+import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/models/user_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final userIDProvider = StateProvider<String?>((ref) {
+part 'auth_controller.g.dart';
+
+@riverpod
+String? userID(Ref ref) {
   final user = ref.watch(authStateChangeProvider).unwrapPrevious().valueOrNull;
-  print(user?.uid);
   return user?.uid;
-});
+}
 
-final authControllerProvider = NotifierProvider<AuthController, bool>(
-  () => AuthController(),
-);
-
-final authStateChangeProvider = StreamProvider((ref) {
+@riverpod
+Stream<User?> authStateChange(Ref ref) {
   return ref.watch(authRepositoryProvider).authStateChange;
-});
+}
 
-class AuthController extends Notifier<bool> {
+@riverpod
+class AuthController extends _$AuthController {
   @override
   bool build() {
     return false;
@@ -85,13 +90,11 @@ class AuthController extends Notifier<bool> {
   }
 
   Future<void> logout() async {
+    state = true;
+    await ref.read(semesterControllerProvider.notifier).updateRemoteDatabase();
+    await ref.read(gradeToScaleControllerProvider.notifier).updateRemoteMap();
     await _authRepository.logOut();
-    // ref.invalidate(semesterStreamProvider);
-    // ref.invalidate(gradeToScaleStreamProvider);
-    /*  ref.invalidate(authStateChangeProvider);
-    ref.invalidate(gpaStateProvider);
-    ref.invalidate(userIDProvider);
-    ref.invalidate(userDocProvider)  */
+    state = false;
   }
 
   Future<void> forgotPassword(String emailAddress) async {

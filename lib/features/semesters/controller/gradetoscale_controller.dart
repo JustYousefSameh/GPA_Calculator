@@ -5,48 +5,47 @@ import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final gradeToScaleStreamProvider = StreamProvider<List<GradeToScale>>(
-  (ref) async* {
-    yield* ref
-        .read(firestoreProvider)
-        .collection('users')
-        .doc(ref.watch(userIDProvider))
-        .collection('data')
-        .doc('gradeToNumber')
-        .snapshots()
-        .asyncMap(
-      (event) {
-        if (event.data() == null) return [];
-        return List<GradeToScale>.from(
-          event.data()!['gradeToNumber'].map(
-                (e) => GradeToScale.fromMap(e),
-              ),
-        );
-      },
-    );
-  },
-);
+part 'gradetoscale_controller.g.dart';
 
-final gradeScaleMapProvider = FutureProvider<Map<String, dynamic>>(
-  (ref) async {
-    final listOfGradeScales = await ref.watch(gradeToScaleProvider.future);
+@riverpod
+Stream<List<GradeToScale>> gradeToScaleStream(Ref ref) async* {
+  yield* ref
+      .read(firestoreProvider)
+      .collection('users')
+      .doc(ref.watch(userIDProvider))
+      .collection('data')
+      .doc('gradeToNumber')
+      .snapshots()
+      .asyncMap(
+    (event) {
+      if (event.data() == null) return [];
+      return List<GradeToScale>.from(
+        event.data()!['gradeToNumber'].map(
+              (e) => GradeToScale.fromMap(e),
+            ),
+      );
+    },
+  );
+}
 
-    Map<String, dynamic> map = {};
+@riverpod
+Future<Map<String, dynamic>> gradeScaleMap(Ref ref) async {
+  final listOfGradeScales =
+      await ref.watch(gradeToScaleControllerProvider.future);
 
-    listOfGradeScales.where((element) => element.isEnabled).forEach(
-          (element) => map.addAll(element.map),
-        );
+  Map<String, dynamic> map = {};
 
-    return map;
-  },
-);
+  listOfGradeScales.where((element) => element.isEnabled).forEach(
+        (element) => map.addAll(element.map),
+      );
 
-final gradeToScaleProvider =
-    AsyncNotifierProvider<GradeToScaleController, List<GradeToScale>>(
-        GradeToScaleController.new);
+  return map;
+}
 
-class GradeToScaleController extends AsyncNotifier<List<GradeToScale>> {
+@riverpod
+class GradeToScaleController extends _$GradeToScaleController {
   @override
   FutureOr<List<GradeToScale>> build() async {
     return await ref.watch(gradeToScaleStreamProvider.future);
@@ -70,8 +69,20 @@ class GradeToScaleController extends AsyncNotifier<List<GradeToScale>> {
     state = AsyncValue.data(newList);
   }
 
-  Future<void> resetRemoteMap(List<GradeToScale> list) async {
+  void fixLocalMap() {
+    final newList = List<GradeToScale>.from(state.value!);
+    for (var gradeToScale in newList) {
+      gradeToScale.map.forEach((key, value) {
+        if (value == '') {
+          gradeToScale.map[key] = 0.0;
+        }
+      });
+    }
+    state = AsyncValue.data(newList);
+  }
+
+  Future<void> resetLocalMap(List<GradeToScale> list) async {
     state = AsyncValue.data(list);
-    await _gradeToNumberRepository.reset(list);
+    // await _gradeToNumberRepository.reset(list);
   }
 }
