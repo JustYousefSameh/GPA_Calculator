@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
 import 'package:gpa_calculator/core/common/error_text.dart';
 import 'package:gpa_calculator/core/common/loader.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/features/settings/widgets/grade_scale.dart';
 
@@ -19,8 +20,15 @@ class CustomGPA extends ConsumerWidget {
       ),
       body: PopScope(
         onPopInvokedWithResult: (_, __) {
-          ref.read(gradeToScaleControllerProvider.notifier).fixLocalMap();
-          ref.read(gradeToScaleControllerProvider.notifier).updateRemoteMap();
+          ref
+              .read(gradeToScaleControllerProvider.notifier)
+              .updateRemoteMap()
+              .then(
+                (value) => value.fold(
+                  (l) => showErrorSnackBar(context, l.message),
+                  (r) => null,
+                ),
+              );
         },
         child: SingleChildScrollView(
           child: Padding(
@@ -71,6 +79,7 @@ class CustomGPA extends ConsumerWidget {
                     foregroundColor: Theme.of(context).colorScheme.onError,
                   ),
                   onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(

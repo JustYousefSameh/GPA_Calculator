@@ -24,7 +24,7 @@ final semesterStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SemesterStreamRef = AutoDisposeStreamProviderRef<List<SemsesterModel>>;
-String _$semesterCounterHash() => r'1e01979f07303bb934bf7d0f3c0b7e27f921a9b3';
+String _$semesterCounterHash() => r'2a58c572d0b49efa9fe1ae1d75a6b2d45184b843';
 
 /// See also [SemesterCounter].
 @ProviderFor(SemesterCounter)

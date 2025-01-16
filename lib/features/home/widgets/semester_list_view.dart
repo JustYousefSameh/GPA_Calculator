@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
+import 'package:gpa_calculator/core/common/error_text.dart';
 import 'package:gpa_calculator/core/common/loader.dart';
+import 'package:gpa_calculator/features/home/widgets/semester_with_button.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 
 class SemesterListView extends ConsumerStatefulWidget {
   const SemesterListView({
     super.key,
-    required this.listKey,
     required this.scrollController,
   });
 
-  final GlobalKey<AnimatedListState> listKey;
   final ScrollController scrollController;
 
   @override
@@ -20,16 +21,20 @@ class SemesterListView extends ConsumerStatefulWidget {
 }
 
 class _SemesterListViewState extends ConsumerState<SemesterListView> {
-  late final Future semesters = ref.read(semesterControllerProvider.future);
+  //Loading semesters for the first time
+  late final semesters = ref.read(semesterControllerProvider.future);
 
   @override
   Widget build(BuildContext context) {
     final semestersCount = ref.watch(semesterCounterProvider);
 
-    Either<int?, Object> value = switch (semestersCount) {
+    // Updating the key to cause the AnimatedList to rebulid
+    semesterListKey = GlobalKey<AnimatedListState>();
+
+    Either<int?, String> value = switch (semestersCount) {
       AsyncData(:final value) => left(value),
       AsyncLoading(:final value) => left(value),
-      AsyncError(:final error) => right(error),
+      AsyncError() => right(Constants.errorText),
       final v => throw StateError('what is $v'),
     };
 
@@ -44,7 +49,7 @@ class _SemesterListViewState extends ConsumerState<SemesterListView> {
               }
               return AnimatedList(
                 controller: widget.scrollController,
-                key: widget.listKey,
+                key: semesterListKey,
                 initialItemCount: count,
                 shrinkWrap: true,
                 physics: const ClampingScrollPhysics(),
@@ -64,8 +69,10 @@ class _SemesterListViewState extends ConsumerState<SemesterListView> {
                 },
               );
             },
-            (error) => Text(error.toString()),
+            (error) => ErrorText(error: error),
           );
+        } else if (snapshot.hasError) {
+          return ErrorText(error: Constants.errorText);
         } else {
           return Loader();
         }

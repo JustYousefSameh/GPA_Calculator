@@ -17,21 +17,7 @@ class SemesterCounter extends _$SemesterCounter {
     final semesterlist = await ref.watch(semesterStreamProvider.future);
     return semesterlist.length;
   }
-
-  addOne() {
-    state = AsyncData(state.asData!.value + 1);
-  }
-
-  removeOne() {
-    state = AsyncData(state.asData!.value - 1);
-  }
 }
-
-// @riverpod
-// FutureOr<int> semesterCounter(Ref ref) async {
-//   final semesterlist = await ref.watch(semesterStreamProvider.future);
-//   return semesterlist.length;
-// }
 
 @riverpod
 Stream<List<SemsesterModel>> semesterStream(Ref ref) async* {
@@ -68,14 +54,10 @@ class SemesterController extends _$SemesterController {
   void addSemester() {
     final List<SemsesterModel> newList =
         List.from(state.asData!.value..add(SemsesterModel.empty()));
-    // ref.read(semesterCounterProvider.notifier).addOne();
-    // ref.read(semesterCounterProvider.).update((p0) => p0 + 1);
     state = AsyncData(newList);
   }
 
   void deleteSemester(String id) async {
-    // ref.read(semesterCounterProvider.notifier).update((p0) => p0 - 1);
-    // ref.read(semesterCounterProvider.notifier).removeOne();
     state = AsyncData(List.from(state.value!
       ..remove(
           state.asData!.value.singleWhere((element) => element.id == id))));
@@ -107,8 +89,3 @@ class SemesterController extends _$SemesterController {
     );
   }
 }
-
-// final semesterControllerProvider =
-//     AsyncNotifierProvider.autoDispose<SemesterController, List<SemsesterModel>>(
-//   SemesterController.new,
-// );

@@ -16,10 +16,6 @@ class SemesterWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //Using ref.read() instead of ref.watch() because for some reason it ruins the animations of aniamted list
-    final semesterModel =
-        ref.read(semesterControllerProvider).value?[semesterIndex];
-
     void deleteSemester() async {
       final semesterModelBeforeDelete =
           ref.read(semesterControllerProvider).value![semesterIndex];
@@ -42,7 +38,7 @@ class SemesterWidget extends ConsumerWidget {
 
       ref
           .read(semesterControllerProvider.notifier)
-          .deleteSemester(semesterModel!.id);
+          .deleteSemester(semesterModelBeforeDelete.id);
     }
 
     return Padding(

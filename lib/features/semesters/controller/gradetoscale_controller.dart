@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
@@ -58,9 +60,15 @@ class GradeToScaleController extends _$GradeToScaleController {
     await _gradeToNumberRepository.setDefaultValue(uid);
   }
 
-  Future<void> updateRemoteMap() async {
-    if (!state.hasValue) return;
-    await _gradeToNumberRepository.updateValue(state.value!);
+  Future<Either<Failure, Unit>> updateRemoteMap() async {
+    try {
+      if (!state.hasValue) return left(Failure('No value'));
+      fixLocalMap();
+      await _gradeToNumberRepository.updateValue(state.value!);
+      return right(unit);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 
   void updateLocalMap(int index, GradeToScale gradeToScale) {

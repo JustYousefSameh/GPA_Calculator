@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
+import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
@@ -45,8 +47,13 @@ class GradeToScaleRepository {
         .update({'gradeToNumber': list.map((e) => e.toMap())});
   }
 
-  Future<void> updateValue(List<GradeToScale> list) async {
-    await _gradeToScaleDoc
-        .update({'gradeToNumber': list.map((e) => e.toMap())});
+  Future<Either<Failure, Unit>> updateValue(List<GradeToScale> list) async {
+    try {
+      await _gradeToScaleDoc
+          .update({'gradeToNumber': list.map((e) => e.toMap())});
+      return right(unit);
+    } catch (e) {
+      return left(Failure(e.toString()));
+    }
   }
 }

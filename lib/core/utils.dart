@@ -87,12 +87,13 @@ void showSuccessSnackBar(BuildContext context, String text) {
       SnackBar(
         elevation: 0,
         behavior: SnackBarBehavior.floating,
+        dismissDirection: DismissDirection.horizontal,
         backgroundColor: Colors.transparent,
         content: Container(
           height: 50,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 39, 139, 26),
+            color: const Color.fromARGB(255, 37, 128, 25),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Container(
@@ -102,7 +103,7 @@ void showSuccessSnackBar(BuildContext context, String text) {
             child: Row(
               children: [
                 const Icon(
-                  Icons.check,
+                  Icons.check_circle,
                   color: Colors.white,
                 ),
                 const SizedBox(width: 5),
@@ -111,6 +112,9 @@ void showSuccessSnackBar(BuildContext context, String text) {
                     text,
                     maxLines: 3,
                     overflow: TextOverflow.visible,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],

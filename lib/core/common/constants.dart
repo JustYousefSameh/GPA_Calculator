@@ -5,6 +5,8 @@ class Constants {
 
   static RegExp regex = RegExp(r'([.]*0)');
 
+  static String errorText = 'An error has occured sorry for the inconvenience';
+
   static const gradeScale = [
     GradeToScale(isEnabled: true, map: {"A+": 4.3}),
     GradeToScale(isEnabled: true, map: {"A": 4.0}),

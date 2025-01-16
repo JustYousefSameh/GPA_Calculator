@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
 import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 class GradeScaleWidget extends ConsumerStatefulWidget {
-  // final GradeToScale gradeToScale;
   final int index;
 
   const GradeScaleWidget({
     super.key,
-    // required this.gradeToScale,
     required this.index,
   });
 
@@ -26,6 +24,8 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
   late final GradeToScaleController controller =
       ref.read(gradeToScaleControllerProvider.notifier);
 
+  FocusNode focusNode = FocusNode();
+
   int? creditCursorPosition;
   String? lastGradeScaleText;
 
@@ -38,6 +38,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
 
   @override
   void dispose() {
+    focusNode.dispose();
     gradeScaleTextController.dispose();
     super.dispose();
   }
@@ -64,10 +65,14 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
   Widget build(BuildContext context) {
     gradeToScale = ref.watch(gradeToScaleControllerProvider
         .select((value) => value.value![widget.index]));
+
     final isEnabled = gradeToScale.isEnabled;
     final map = gradeToScale.map.entries.first;
 
-    if (map.value == Constants.gradeScale[widget.index].map[map.key]) {
+    // if the value is the same as the default value & the node is not focused
+    // this means we're ressitting it to the default value
+    if (map.value == Constants.gradeScale[widget.index].map[map.key] &&
+        !focusNode.hasPrimaryFocus) {
       lastGradeScaleText = null;
     }
     gradeScaleTextController.text = lastGradeScaleText ?? map.value.toString();
@@ -104,6 +109,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextFormField(
+                focusNode: focusNode,
                 enabled: isEnabled,
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(5),

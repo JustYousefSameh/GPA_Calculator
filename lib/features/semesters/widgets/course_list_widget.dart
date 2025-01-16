@@ -18,13 +18,19 @@ class CourseList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final coursesCount = ref.watch(semesterControllerProvider
-        .select((value) => value.value![semesterIndex].courses.length));
+    final coursesCount = ref.watch(semesterControllerProvider.select((value) {
+      // in case a semester is deleted the next rebuild would throw a range error
+      if (semesterIndex >= value.value!.length) {
+        return null;
+      }
+      return value.value![semesterIndex].courses.length;
+    }));
+
     return Column(
       children: [
         AnimatedList(
           key: listKey,
-          initialItemCount: coursesCount,
+          initialItemCount: coursesCount ?? 0,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index, animation) {
@@ -44,7 +50,7 @@ class CourseList extends ConsumerWidget {
           children: [
             AddCourseButton(
               listKey: listKey,
-              couresesCount: coursesCount,
+              couresesCount: coursesCount ?? 0,
               semesterIndex: semesterIndex,
             ),
             SemesterGPA(

@@ -64,56 +64,79 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     // const Divider(thickness: 2, height: 2),
                     Spacer(),
-                    SizedBox(
-                      height: 50,
-                      child: TextButton.icon(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Delete Account"),
-                              content: Text(
-                                "Deleting your account will remove all your data from the cloud. This action cannot be undone.",
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              actions: [
-                                TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context, "Cancel");
-                                    },
-                                    child: const Text("Cancel")),
-                                TextButton(
-                                  onPressed: () {
-                                    ref
-                                        .read(authControllerProvider.notifier)
-                                        .deleteAccount();
-                                    Navigator.pop(context, "Cancel");
-                                  },
-                                  child: Text(
-                                    "Delete",
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.error,
-                                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text("Delete Account"),
+                                  content: Text(
+                                    "Deleting your account will remove all your data from the cloud. This action cannot be undone.",
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context, "Cancel");
+                                        },
+                                        child: const Text("Cancel")),
+                                    TextButton(
+                                      onPressed: () {
+                                        ref
+                                            .read(
+                                                authControllerProvider.notifier)
+                                            .deleteAccount();
+                                        Navigator.pop(context, "Cancel");
+                                      },
+                                      child: Text(
+                                        "Delete",
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .error,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              );
+                            },
+                            icon: Icon(
+                              Icons.delete_forever,
+                              size: 25,
+                              color: Theme.of(context).colorScheme.error,
                             ),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.delete_forever,
-                          size: 25,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        label: Text(
-                          "Delete Account",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 20,
+                            label: Text(
+                              "Delete Account",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 20,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        SizedBox(
+                          child: TextButton.icon(
+                            onPressed: () {
+                              context.push('/settings/aboutdeveloper');
+                            },
+                            icon: Icon(
+                              Icons.info_outline_rounded,
+                              size: 25,
+                            ),
+                            label: Text(
+                              "About Developer",
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                   ],

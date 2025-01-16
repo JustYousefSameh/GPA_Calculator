@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 import 'package:gpa_calculator/models/semester_model.dart';
 

@@ -11,22 +11,25 @@ part 'app_cycle_listener.g.dart';
 appLifeCycleListener(Ref ref) {
   final isSignedIn =
       ref.watch(authStateChangeProvider).unwrapPrevious().valueOrNull;
+
+  final semesterControllerNotifier =
+      ref.read(semesterControllerProvider.notifier);
+  final gradeToScaleControllerNotifier =
+      ref.read(gradeToScaleControllerProvider.notifier);
+
+  Future<void> updateRemoteDatabase() async {
+    await semesterControllerNotifier.updateRemoteDatabase();
+    await gradeToScaleControllerNotifier.updateRemoteMap();
+  }
+
   return AppLifecycleListener(
     onDetach: () async {
       if (isSignedIn == null) return;
-
-      await ref
-          .read(semesterControllerProvider.notifier)
-          .updateRemoteDatabase();
-      await ref.read(gradeToScaleControllerProvider.notifier).updateRemoteMap();
+      await updateRemoteDatabase();
     },
     onInactive: () async {
       if (isSignedIn == null) return;
-
-      await ref
-          .read(semesterControllerProvider.notifier)
-          .updateRemoteDatabase();
-      await ref.read(gradeToScaleControllerProvider.notifier).updateRemoteMap();
+      await updateRemoteDatabase();
     },
   );
 }

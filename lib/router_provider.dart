@@ -6,6 +6,7 @@ import 'package:gpa_calculator/features/auth/screens/forgot_screen.dart';
 import 'package:gpa_calculator/features/auth/screens/signin_screen.dart';
 import 'package:gpa_calculator/features/auth/screens/signup_screen.dart';
 import 'package:gpa_calculator/features/home/screens/home_screen.dart';
+import 'package:gpa_calculator/features/settings/screens/about_developer_screen.dart';
 import 'package:gpa_calculator/features/settings/screens/settings_screen.dart';
 import 'package:gpa_calculator/features/settings/widgets/custom_gpa.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -66,6 +67,9 @@ GoRouter router(Ref ref) {
             path: 'customGPA',
             builder: (context, state) => const CustomGPA(),
           ),
+          GoRoute(
+              path: 'aboutdeveloper',
+              builder: (context, state) => const AboutDevloperScreen()),
         ],
       ),
     ],

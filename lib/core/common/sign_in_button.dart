@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gpa_calculator/core/constants/constants.dart';
+import 'package:gpa_calculator/core/common/constants.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 
 class SignInButton extends ConsumerWidget {
