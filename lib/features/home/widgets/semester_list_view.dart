@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/common/loader.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/semester_widget.dart';
 
@@ -39,9 +40,7 @@ class _SemesterListViewState extends ConsumerState<SemesterListView> {
           return value.fold(
             (count) {
               if (count == null) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
+                return Loader();
               }
               return AnimatedList(
                 controller: widget.scrollController,
@@ -68,7 +67,7 @@ class _SemesterListViewState extends ConsumerState<SemesterListView> {
             (error) => Text(error.toString()),
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return Loader();
         }
       },
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/common/error_text.dart';
+import 'package:gpa_calculator/core/common/loader.dart';
 import 'package:gpa_calculator/core/constants/constants.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
 import 'package:gpa_calculator/features/settings/widgets/grade_scale.dart';
-import 'package:gpa_calculator/models/grade_scale_model.dart';
 
 class CustomGPA extends ConsumerWidget {
   const CustomGPA({
@@ -119,38 +119,89 @@ class GradeToScaleListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gradeToNumberProvider = ref.read(gradeToScaleControllerProvider);
+    final gradeToNumberProvider = ref.watch(
+        gradeToScaleControllerProvider.selectAsync((value) => value.length));
 
-    final List<GradeToScale>? value = switch (gradeToNumberProvider) {
-      AsyncData(:final value) => value,
-      // AsyncError(:final error) => throw StateError(error.toString()),
-      AsyncLoading(:final value) => value,
-      final v => throw StateError('what is $v'),
-    };
+    return FutureBuilder(
+      future: gradeToNumberProvider,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Loader();
+        }
 
-    if (value == null) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+        if (snapshot.hasError) {
+          return ErrorText(error: snapshot.error.toString());
+        }
 
-    if (gradeToNumberProvider.hasError) {
-      return Center(
-        child: Text("Sorry there was an error."),
-      );
-    }
-
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      children: value
-          .mapWithIndex(
-            (e, index) => GradeScaleWidget(
+        return ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: snapshot.data,
+          itemBuilder: (context, index) {
+            return GradeScaleWidget(
               index: index,
-            ),
-          )
-          .toList(),
+            );
+          },
+        );
+      },
     );
+    // return switch (gradeToNumberProvider) {
+    //   AsyncData(:final value) => ListView(
+    //       physics: const NeverScrollableScrollPhysics(),
+    //       shrinkWrap: true,
+    //       children: value!
+    //           .mapWithIndex(
+    //             (e, index) => GradeScaleWidget(
+    //               index: index,
+    //             ),
+    //           )
+    //           .toList(),
+    //     ),
+    //   AsyncLoading() => Loader(),
+    //   AsyncError(:final error) =>
+    //     ErrorText(error: error.toString()),
+    // };
+
+    // return switch (gradeToNumberProvider) {
+    //   AsyncData(:final value) => ListView(
+    //       physics: const NeverScrollableScrollPhysics(),
+    //       shrinkWrap: true,
+    //       children: value
+    //           .mapWithIndex(
+    //             (e, index) => GradeScaleWidget(
+    //               index: index,
+    //             ),
+    //           )
+    //           .toList(),
+    //     ),
+    //   AsyncLoading() => const Center(child: CircularProgressIndicator()),
+    //   AsyncError(:final error) =>
+    //     Center(child: Text("Sorry there was an error.")),
+    // };
+
+    // if (value == null) {
+    //   return Center(
+    //     child: CircularProgressIndicator(),
+    //   );
+    // }
+
+    // if (gradeToNumberProvider.hasError) {
+    //   return Center(
+    //     child: Text("Sorry there was an error."),
+    //   );
+    // }
+
+    // return ListView(
+    //   physics: const NeverScrollableScrollPhysics(),
+    //   shrinkWrap: true,
+    //   children: value
+    //       .mapWithIndex(
+    //         (e, index) => GradeScaleWidget(
+    //           index: index,
+    //         ),
+    //       )
+    //       .toList(),
+    // );
 
     // return switch (gradeToNumberProvider) {
     //   AsyncLoading(:final value) => value != null

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gpa_calculator/main.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final themeControllerProvider =
-    NotifierProvider<ThemeControllerNotifier, ThemeMode>(
-        ThemeControllerNotifier.new);
+part 'theme_provider.g.dart';
 
-class ThemeControllerNotifier extends Notifier<ThemeMode> {
+@riverpod
+class ThemeController extends _$ThemeController {
   @override
   ThemeMode build() {
     final String? theme = prefs.getString('Theme');

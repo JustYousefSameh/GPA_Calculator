@@ -6,7 +6,7 @@ part of 'gpa_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$semesterGPAHash() => r'2bb3ac2faa05310c5bb7a2045592f6d24bbd8ae9';
+String _$semesterGPAHash() => r'3992553a297f29b3095fae40a87a79cd6f650ed9';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -157,7 +157,7 @@ class _SemesterGPAProviderElement
   int get semesterIndex => (origin as SemesterGPAProvider).semesterIndex;
 }
 
-String _$gpaStateHash() => r'8287e5faf6ec8dfdb536ad69d9602bcace401de3';
+String _$gpaStateHash() => r'6502241a4747ed8d6f6264edb5846ddd84cde1ef';
 
 /// See also [gpaState].
 @ProviderFor(gpaState)

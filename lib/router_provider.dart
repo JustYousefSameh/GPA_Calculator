@@ -5,7 +5,7 @@ import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
 import 'package:gpa_calculator/features/auth/screens/forgot_screen.dart';
 import 'package:gpa_calculator/features/auth/screens/signin_screen.dart';
 import 'package:gpa_calculator/features/auth/screens/signup_screen.dart';
-import 'package:gpa_calculator/features/home/screens/homescreen.dart';
+import 'package:gpa_calculator/features/home/screens/home_screen.dart';
 import 'package:gpa_calculator/features/settings/screens/settings_screen.dart';
 import 'package:gpa_calculator/features/settings/widgets/custom_gpa.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

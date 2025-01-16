@@ -65,40 +65,16 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
       widget.courseIndex,
       (context, animation) {
         return SmoothSlideSize(
-            animation: animation,
-            child: DummyCourseWidget(
-              courseName: courseModel.courseName,
-              grade: courseModel.grade,
-              credits: courseModel.credits,
-            ));
-
-        // SlideTransition(
-        //   position: Tween<Offset>(
-        //     begin: const Offset(-1.2, 0),
-        //     end: const Offset(0, 0),
-        //   ).animate(
-        //     CurvedAnimation(
-        //       parent: animation,
-        //       curve: const Interval(0.5, 1, curve: Curves.ease),
-        //     ),
-        //   ),
-        //   child: SizeTransition(
-        //     sizeFactor: Tween<double>(
-        //       begin: 0,
-        //       end: 1,
-        //     ).animate(
-        //       CurvedAnimation(
-        //         parent: animation,
-        //         curve: const Interval(0, 0.5, curve: Curves.ease),
-        //       ),
-        //     ),
-        //     child:,
-        //   ),
-        // );
+          animation: animation,
+          child: DummyCourseWidget(
+            courseName: courseModel.courseName,
+            grade: courseModel.grade,
+            credits: courseModel.credits,
+          ),
+        );
       },
       duration: const Duration(milliseconds: 700),
     );
-
     controller.deleteCourse(widget.semesterIndex, widget.courseIndex);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/home/controllers/gpa_provider.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/widgets/course_widget.dart';
@@ -27,30 +28,12 @@ class CourseList extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index, animation) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(-1.2, 0),
-                end: const Offset(0, 0),
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: const Interval(0.5, 1, curve: Curves.ease),
-                ),
-              ),
-              child: SizeTransition(
-                sizeFactor: Tween<double>(
-                  begin: 0,
-                  end: 1,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: const Interval(0, 0.5, curve: Curves.ease),
-                  ),
-                ),
-                child: CourseWidget(
-                  semesterIndex: semesterIndex,
-                  courseIndex: index,
-                ),
+            return SmoothSlideSize(
+              animation: animation,
+              child: CourseWidget(
+                key: UniqueKey(),
+                semesterIndex: semesterIndex,
+                courseIndex: index,
               ),
             );
           },
