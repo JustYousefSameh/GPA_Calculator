@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gpa_calculator/core/app_cycle_listener.dart';
 import 'package:gpa_calculator/core/theme_provider.dart';
 import 'package:gpa_calculator/firebase_options.dart';
 import 'package:gpa_calculator/router_provider.dart';
@@ -26,7 +25,6 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeControllerProvider);
     final router = ref.watch(routerProvider);
-    ref.read(appLifeCycleListenerProvider);
     return MaterialApp.router(
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

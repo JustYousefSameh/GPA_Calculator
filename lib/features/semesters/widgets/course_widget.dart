@@ -30,6 +30,30 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
   late CourseModel? courseModel;
 
   @override
+  void didChangeDependencies() {
+    courseModel = ref
+        .read(semesterControllerProvider)
+        .value![widget.semesterIndex]
+        .courses[widget.courseIndex];
+    nameController.text = courseModel!.courseName;
+    creditController.text = lastCreditText ??
+        (courseModel!.credits == null ? '' : courseModel!.credits.toString());
+    super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    courseModel = ref
+        .read(semesterControllerProvider)
+        .value![widget.semesterIndex]
+        .courses[widget.courseIndex];
+    nameController.text = courseModel!.courseName;
+    creditController.text = lastCreditText ??
+        (courseModel!.credits == null ? '' : courseModel!.credits.toString());
+    super.initState();
+  }
+
+  @override
   void dispose() {
     nameController.dispose();
     creditController.dispose();
@@ -42,18 +66,18 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
   String? lastCreditText;
 
   Future<void> updateCourseModel({String? grade}) async {
-    lastCreditText = creditController.text;
-    //Cache the cursor posotions
-    nameCursorPosition = nameController.selection.baseOffset;
-    creditCursorPosition = creditController.selection.baseOffset;
+    final newCourseModel = ref
+        .read(semesterControllerProvider)
+        .value![widget.semesterIndex]
+        .courses[widget.courseIndex];
 
     controller.updateCourse(
       widget.semesterIndex,
       widget.courseIndex,
-      courseModel!.copyWith(
+      newCourseModel.copyWith(
         courseName: nameController.text,
         credits: creditController.text.isEmpty
-            ? Wrapped.value(null)
+            ? const Wrapped.value(null)
             : Wrapped.value(double.parse(creditController.text)),
         grade: grade,
       ),
@@ -61,15 +85,20 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
   }
 
   void deleteCourse() {
+    final newCourseModel = ref
+        .read(semesterControllerProvider)
+        .value![widget.semesterIndex]
+        .courses[widget.courseIndex];
+
     AnimatedList.of(context).removeItem(
       widget.courseIndex,
       (context, animation) {
         return SmoothSlideSize(
           animation: animation,
           child: DummyCourseWidget(
-            courseName: courseModel!.courseName,
-            grade: courseModel!.grade,
-            credits: courseModel!.credits,
+            courseName: newCourseModel.courseName,
+            grade: newCourseModel.grade,
+            credits: newCourseModel.credits,
           ),
         );
       },
@@ -80,42 +109,6 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
 
   @override
   Widget build(BuildContext context) {
-    courseModel = ref.watch(semesterControllerProvider.select((value) {
-      // in case a course or a semester is deleted the next rebuild would throw a range error
-      if (widget.semesterIndex >= value.value!.length ||
-          widget.courseIndex >=
-              value.value![widget.semesterIndex].courses.length) {
-        return null;
-      }
-      return value.value![widget.semesterIndex].courses[widget.courseIndex];
-    }));
-
-    nameController.text = courseModel!.courseName;
-
-    if (nameCursorPosition != null) {
-      nameCursorPosition = nameCursorPosition! > nameController.text.length
-          ? nameController.text.length
-          : nameCursorPosition;
-      nameController.selection = TextSelection.fromPosition(
-        TextPosition(offset: nameCursorPosition ?? nameController.text.length),
-      );
-    }
-
-    creditController.text = lastCreditText ??
-        (courseModel!.credits == null ? '' : courseModel!.credits.toString());
-
-    if (creditCursorPosition != null) {
-      creditCursorPosition =
-          creditCursorPosition! > creditController.text.length
-              ? creditController.text.length
-              : creditCursorPosition;
-
-      creditController.selection = TextSelection.fromPosition(
-        TextPosition(
-            offset: creditCursorPosition ?? creditController.text.length),
-      );
-    }
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -140,8 +133,8 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
               child: SizedBox(
                 height: 48,
                 child: GPADropdown(
-                  updateGrade: (String grade) async =>
-                      await updateCourseModel(grade: grade),
+                  updateGrade: (String grade) =>
+                      updateCourseModel(grade: grade),
                   selectedValue: courseModel!.grade,
                   id: courseModel!.id,
                 ),
@@ -163,26 +156,7 @@ class _CourseWidgetState extends ConsumerState<CourseWidget> {
                   SinglePeriodEnforcer()
                 ],
                 keyboardType: TextInputType.number,
-                onChanged: (newValue) {
-                  updateCourseModel();
-                  return;
-                  // if (newValue.isEmpty) {
-                  //   updateCourseModel();
-                  //   return;
-                  // }
-                  // final newValueAfterregex = double.parse(newValue)
-                  //     .toString()
-                  //     .replaceAll(Constants.regex, '');
-
-                  // final value = courseModel.credits
-                  //     .toString()
-                  //     .replaceAll(Constants.regex, '');
-
-                  // if (newValueAfterregex != value &&
-                  //     newValue.substring(newValue.length - 1) != '.') {
-                  //   updateCourseModel();
-                  // }
-                },
+                onChanged: (newValue) => updateCourseModel(),
               ),
             ),
           ),

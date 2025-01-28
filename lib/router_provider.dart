@@ -22,7 +22,7 @@ GoRouter router(Ref ref) {
   final userModel = ref.watch(authStateChangeProvider).valueOrNull;
   return _previousRouter = GoRouter(
     debugLogDiagnostics: true,
-    // navigatorKey: navigatorKey,
+    navigatorKey: navigatorKey,
     initialLocation: _previousRouter?.state?.fullPath,
     redirect: (context, state) {
       if (userModel == null &&

@@ -6,7 +6,7 @@ part of 'gpa_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$semesterGPAHash() => r'3992553a297f29b3095fae40a87a79cd6f650ed9';
+String _$semesterGPAHash() => r'1517134f036f785ed1a3d0c3d80ef901e219d580';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,7 +34,7 @@ class _SystemHash {
 const semesterGPAProvider = SemesterGPAFamily();
 
 /// See also [semesterGPA].
-class SemesterGPAFamily extends Family<AsyncValue<double>> {
+class SemesterGPAFamily extends Family<double> {
   /// See also [semesterGPA].
   const SemesterGPAFamily();
 
@@ -72,7 +72,7 @@ class SemesterGPAFamily extends Family<AsyncValue<double>> {
 }
 
 /// See also [semesterGPA].
-class SemesterGPAProvider extends AutoDisposeFutureProvider<double> {
+class SemesterGPAProvider extends AutoDisposeProvider<double> {
   /// See also [semesterGPA].
   SemesterGPAProvider(
     int semesterIndex,
@@ -107,7 +107,7 @@ class SemesterGPAProvider extends AutoDisposeFutureProvider<double> {
 
   @override
   Override overrideWith(
-    FutureOr<double> Function(SemesterGPARef provider) create,
+    double Function(SemesterGPARef provider) create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -124,7 +124,7 @@ class SemesterGPAProvider extends AutoDisposeFutureProvider<double> {
   }
 
   @override
-  AutoDisposeFutureProviderElement<double> createElement() {
+  AutoDisposeProviderElement<double> createElement() {
     return _SemesterGPAProviderElement(this);
   }
 
@@ -144,13 +144,13 @@ class SemesterGPAProvider extends AutoDisposeFutureProvider<double> {
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin SemesterGPARef on AutoDisposeFutureProviderRef<double> {
+mixin SemesterGPARef on AutoDisposeProviderRef<double> {
   /// The parameter `semesterIndex` of this provider.
   int get semesterIndex;
 }
 
-class _SemesterGPAProviderElement
-    extends AutoDisposeFutureProviderElement<double> with SemesterGPARef {
+class _SemesterGPAProviderElement extends AutoDisposeProviderElement<double>
+    with SemesterGPARef {
   _SemesterGPAProviderElement(super.provider);
 
   @override

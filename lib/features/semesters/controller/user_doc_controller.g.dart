@@ -6,7 +6,7 @@ part of 'user_doc_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userDocHash() => r'7d21c32a3df237580f6741e97aa79380bb80cd78';
+String _$userDocHash() => r'ef57c17e8fa5f3cbcd1ab50ba651f9adfff96513';
 
 /// See also [userDoc].
 @ProviderFor(userDoc)

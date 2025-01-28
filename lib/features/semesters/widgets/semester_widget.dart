@@ -13,34 +13,33 @@ class SemesterWidget extends ConsumerWidget {
   });
 
   final int semesterIndex;
+  void deleteSemester(WidgetRef ref, BuildContext context) {
+    final semesterModelBeforeDelete =
+        ref.read(semesterControllerProvider).requireValue[semesterIndex];
+
+    final gpa = ref.read(semesterGPAProvider(semesterIndex));
+
+    // ignore: use_build_context_synchronously
+    AnimatedList.of(context).removeItem(
+      semesterIndex,
+      (context, animation) => SmoothSlideSize(
+        animation: animation,
+        child: DummySemesterWidget(
+          semesterIndex: semesterIndex,
+          semesterModel: semesterModelBeforeDelete,
+          gpa: gpa,
+        ),
+      ),
+      duration: const Duration(milliseconds: 700),
+    );
+
+    ref
+        .read(semesterControllerProvider.notifier)
+        .deleteSemester(semesterModelBeforeDelete.id);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    void deleteSemester() async {
-      final semesterModelBeforeDelete =
-          ref.read(semesterControllerProvider).value![semesterIndex];
-
-      final gpa = await ref.read(semesterGPAProvider(semesterIndex).future);
-
-      // ignore: use_build_context_synchronously
-      AnimatedList.of(context).removeItem(
-        semesterIndex,
-        (context, animation) => SmoothSlideSize(
-          animation: animation,
-          child: DummySemesterWidget(
-            semesterIndex: semesterIndex,
-            semesterModel: semesterModelBeforeDelete,
-            gpa: gpa,
-          ),
-        ),
-        duration: const Duration(milliseconds: 700),
-      );
-
-      ref
-          .read(semesterControllerProvider.notifier)
-          .deleteSemester(semesterModelBeforeDelete.id);
-    }
-
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       child: Material(
@@ -68,9 +67,21 @@ class SemesterWidget extends ConsumerWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      showDialog(
+                      showGeneralDialog(
                         context: context,
-                        builder: (context) => AlertDialog(
+                        transitionBuilder: (ctx, a1, a2, child) {
+                          return FadeTransition(
+                            opacity:
+                                CurvedAnimation(parent: a1, curve: Curves.ease),
+                            child: ScaleTransition(
+                              scale: CurvedAnimation(
+                                  parent: a1, curve: Curves.ease),
+                              child: child,
+                            ),
+                          );
+                        },
+                        transitionDuration: const Duration(milliseconds: 350),
+                        pageBuilder: (newContext, a1, a2) => AlertDialog(
                           title: const Text("Delete Semester"),
                           content: Text(
                             "Are you sure you want to delete this semester?",
@@ -83,11 +94,21 @@ class SemesterWidget extends ConsumerWidget {
                                 },
                                 child: const Text("Cancel")),
                             TextButton(
-                                onPressed: () {
-                                  deleteSemester();
-                                  Navigator.pop(context, "Cancel");
-                                },
-                                child: const Text("Delete")),
+                              onPressed: () {
+                                WidgetsBinding.instance.addPostFrameCallback(
+                                  (_) {
+                                    deleteSemester(ref, context);
+                                  },
+                                );
+
+                                Navigator.pop(context, "Cancel");
+                              },
+                              child: Text(
+                                "Delete",
+                                style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error),
+                              ),
+                            ),
                           ],
                         ),
                       );

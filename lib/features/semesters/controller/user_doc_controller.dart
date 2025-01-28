@@ -10,14 +10,13 @@ part 'user_doc_controller.g.dart';
 @riverpod
 Stream<UserModel?> userDoc(Ref ref) async* {
   final id = ref.watch(userIDProvider);
-  if (id == null) yield null;
   yield* ref
-      .read(firestoreProvider)
+      .watch(firestoreProvider)
       .collection('users')
       .doc(id)
       .snapshots()
+      .where((event) => event.data() != null)
       .asyncMap((event) {
-    if (event.data() == null) return null;
     return UserModel.fromMap(event.data()!);
   });
 }

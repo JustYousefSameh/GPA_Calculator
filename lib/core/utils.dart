@@ -42,7 +42,7 @@ void showErrorSnackBar(BuildContext context, String text) {
     ..showSnackBar(
       SnackBar(
         elevation: 0,
-        dismissDirection: DismissDirection.vertical,
+        dismissDirection: DismissDirection.horizontal,
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.transparent,
         content: Container(

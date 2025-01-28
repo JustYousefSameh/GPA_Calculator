@@ -145,8 +145,8 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
             child: Center(
               child: IconButton(
                 icon: isEnabled
-                    ? Icon(Icons.visibility)
-                    : Icon(Icons.visibility_off),
+                    ? const Icon(Icons.visibility)
+                    : const Icon(Icons.visibility_off),
                 onPressed: () {
                   updateLocal(isEnabled: !isEnabled);
                 },

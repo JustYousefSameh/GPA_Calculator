@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/features/home/widgets/semester_with_button.dart';
 import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
@@ -16,9 +15,9 @@ class AddSemesterButton extends ConsumerWidget {
 
   void addSemester(WidgetRef ref) async {
     semesterListKey.currentState!
-        .insertItem((await ref.read(semesterControllerProvider.future)).length);
+        .insertItem(ref.read(semesterControllerProvider).requireValue.length);
 
-    SchedulerBinding.instance.addPostFrameCallback(
+    WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
@@ -32,16 +31,12 @@ class AddSemesterButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasError = ref.watch(semesterCounterProvider).hasError;
-    if (hasError) {
-      return const SizedBox();
-    }
     return Padding(
       padding: const EdgeInsets.only(right: 8, bottom: 8),
       child: FloatingActionButton(
-          child: Icon(
+          child: const Icon(
             Icons.add,
-            size: 36,
+            size: 37,
           ),
           onPressed: () => addSemester(ref)),
     );

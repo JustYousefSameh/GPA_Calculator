@@ -6,7 +6,7 @@ part of 'semester_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$semesterStreamHash() => r'91a397d1ae70e1e7cea0595b9e17be070aa7efa9';
+String _$semesterStreamHash() => r'77a35370da74e66af57d4663065b2c076934e55f';
 
 /// See also [semesterStream].
 @ProviderFor(semesterStream)
@@ -24,24 +24,8 @@ final semesterStreamProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SemesterStreamRef = AutoDisposeStreamProviderRef<List<SemsesterModel>>;
-String _$semesterCounterHash() => r'2a58c572d0b49efa9fe1ae1d75a6b2d45184b843';
-
-/// See also [SemesterCounter].
-@ProviderFor(SemesterCounter)
-final semesterCounterProvider =
-    AutoDisposeAsyncNotifierProvider<SemesterCounter, int>.internal(
-  SemesterCounter.new,
-  name: r'semesterCounterProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$semesterCounterHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-typedef _$SemesterCounter = AutoDisposeAsyncNotifier<int>;
 String _$semesterControllerHash() =>
-    r'b2257e0a0510f514d9a43ae8839aac8f46146caa';
+    r'17fa9d7452d06b2fea01c7f68cdd3fa3dc8efa23';
 
 /// See also [SemesterController].
 @ProviderFor(SemesterController)

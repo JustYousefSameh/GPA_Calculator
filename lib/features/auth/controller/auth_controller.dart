@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/utils.dart';
 import 'package:gpa_calculator/features/auth/repository/auth_repository.dart';
 import 'package:gpa_calculator/features/semesters/controller/gradetoscale_controller.dart';
@@ -81,9 +83,33 @@ class AuthController extends _$AuthController {
     );
   }
 
-  Future<void> deleteAccount() async {
-    await _authRepository.deleteAccount();
+  Future<String> determineAccountType() async {
+    final successOrFailure = await _authRepository.signInType();
+    return successOrFailure.fold((l) => '', (r) => r);
   }
+
+  Future<Either<Failure, Unit>> deleteGoogleAccount(
+      BuildContext context) async {
+    final successOrFailure = await _authRepository.deleteGoogleAccount();
+    return successOrFailure;
+  }
+
+  Future<Either<Failure, Unit>> deletePasswordAccount(
+      BuildContext context, String email, String password) async {
+    final successOrFailure =
+        await _authRepository.deletePasswordAccount(email, password);
+    return successOrFailure;
+  }
+
+  // Future<void> deleteAccount(
+  //     BuildContext context, String email, String password) async {
+  //   final successOrFailure =
+  //       await _authRepository.deleteAccount(email, password);
+  //   successOrFailure.fold(
+  //     (l) => showErrorSnackBar(context, l.message),
+  //     (r) => {},
+  //   );
+  // }
 
   Stream<UserModel> getUserData(String uid) {
     return _authRepository.getUserData(uid);

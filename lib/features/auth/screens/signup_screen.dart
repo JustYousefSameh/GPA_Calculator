@@ -107,12 +107,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       return null;
                                     },
                                     controller: userNameTextController,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                      suffixIcon:
-                                          const Icon(Icons.perm_identity),
+                                          EdgeInsets.symmetric(horizontal: 10),
+                                      suffixIcon: Icon(Icons.perm_identity),
                                       // border: OutlineInputBorder(
                                       //   borderRadius: BorderRadius.circular(10),
                                       // ),
@@ -144,12 +142,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                       return null;
                                     },
                                     controller: emailTextController,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                      suffixIcon:
-                                          const Icon(Icons.email_outlined),
+                                          EdgeInsets.symmetric(horizontal: 10),
+                                      suffixIcon: Icon(Icons.email_outlined),
                                       // border: OutlineInputBorder(
                                       //   borderRadius: BorderRadius.circular(10),
                                       // ),
@@ -253,8 +249,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          if (isLoading) const LinearProgressIndicator(),
                           const Spacer(),
                           const Row(
                             crossAxisAlignment: CrossAxisAlignment.center,

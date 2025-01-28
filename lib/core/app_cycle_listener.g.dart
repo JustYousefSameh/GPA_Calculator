@@ -7,7 +7,7 @@ part of 'app_cycle_listener.dart';
 // **************************************************************************
 
 String _$appLifeCycleListenerHash() =>
-    r'2b1e1a2370518995e001686cabe0500b47c41043';
+    r'4fb91b0cc980824a1e8d46de3c0737c7fe3fcaab';
 
 /// See also [appLifeCycleListener].
 @ProviderFor(appLifeCycleListener)

@@ -62,7 +62,6 @@ class AuthRepository {
       );
 
       await userCredential.user?.updateDisplayName(userName);
-      // await _auth.userChanges().first;
 
       final userModel = UserModel(
         name: userName,
@@ -77,11 +76,9 @@ class AuthRepository {
 
       return right(unit);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
+      // if (e.code == 'weak-password') {
+      // } else if (e.code == 'email-already-in-use') {
+      // }
       return left(Failure(e.message!));
     }
   }
@@ -108,12 +105,13 @@ class AuthRepository {
       return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
         return left(Failure('User not found'));
       } else if (e.code == 'wrong-password') {
-        print('Invalid passowrd');
         return left(Failure('Invalid passowrd'));
+      } else if (e.code == 'invalid-credential') {
+        return left(Failure('Invalid email and password combination'));
       }
+
       return left(Failure(e.message!));
     }
   }
@@ -162,16 +160,97 @@ class AuthRepository {
         );
   }
 
-  Future<Either<Failure, Unit>> deleteAccount() async {
+  Future<Either<Failure, String>> signInType() async {
     try {
-      if (await _googleSignIn.isSignedIn()) await _googleSignIn.signOut();
-      await _auth.currentUser?.delete();
-      await _firestore.collection('users').doc(_auth.currentUser!.uid).delete();
-      return right(unit);
-    } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message!));
+      final token = await _auth.currentUser?.getIdTokenResult();
+      final signInProvider = token?.signInProvider;
+
+      if (signInProvider == null) {
+        return Left(Failure("user is not signed in"));
+      }
+
+      return Right(signInProvider);
+    } catch (e) {
+      return Left(Failure(e.toString()));
     }
   }
+
+  Future<Either<Failure, Unit>> deletePasswordAccount(
+      String email, String password) async {
+    try {
+      final credentials =
+          EmailAuthProvider.credential(email: email, password: password);
+      await _auth.currentUser!.reauthenticateWithCredential(credentials);
+
+      await _firestore.collection('users').doc(_auth.currentUser!.uid).delete();
+      _auth.currentUser!.delete();
+      return const Right(unit);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return left(Failure('User not found'));
+      } else if (e.code == 'wrong-password') {
+        return left(Failure('Invalid passowrd'));
+      } else if (e.code == 'invalid-credential') {
+        return left(Failure('Invalid email and password combination'));
+      }
+      return left(Failure(e.code));
+    }
+  }
+
+  Future<Either<Failure, Unit>> deleteGoogleAccount() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return left(Failure('Canceled by user'));
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.currentUser?.reauthenticateWithCredential(credential);
+      await _firestore.collection('users').doc(_auth.currentUser!.uid).delete();
+      _auth.currentUser!.delete();
+      if (await _googleSignIn.isSignedIn()) await _googleSignIn.signOut();
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  // Future<Either<Failure, Unit>> deleteAccount(
+  //     String email, String password) async {
+  //   try {
+  //     final token = await _auth.currentUser?.getIdTokenResult();
+  //     final signInProvider = token?.signInProvider;
+  //
+  //     print(signInProvider);
+  //     if (signInProvider == null) {
+  //       return Left(Failure("user is not signed in"));
+  //     }
+  //
+  //     if (signInProvider == "password") {
+  //       final credentials =
+  //           EmailAuthProvider.credential(email: email, password: password);
+  //       await _auth.currentUser!.reauthenticateWithCredential(credentials);
+  //
+  //       await _firestore
+  //           .collection('users')
+  //           .doc(_auth.currentUser!.uid)
+  //           .delete();
+  //       _auth.currentUser!.delete();
+  //     } else if (signInProvider == "google.com") {}
+  //     return right(unit);
+  //   } on FirebaseAuthException catch (e) {
+  //     return left(Failure(e.message!));
+  //   }
+  // }
 
   Future<void> forgotPassword(String emailAddress) async {
     await _auth.sendPasswordResetEmail(email: emailAddress);

@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:gpa_calculator/core/failure.dart';
 import 'package:gpa_calculator/core/firebase_providers.dart';
 import 'package:gpa_calculator/features/auth/controller/auth_controller.dart';
+import 'package:gpa_calculator/features/semesters/controller/semester_controller.dart';
 import 'package:gpa_calculator/features/semesters/repository/gradetonumber_repository.dart';
 import 'package:gpa_calculator/models/grade_scale_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,9 +21,9 @@ Stream<List<GradeToScale>> gradeToScaleStream(Ref ref) async* {
       .collection('data')
       .doc('gradeToNumber')
       .snapshots()
+      .where((event) => event.data() != null)
       .asyncMap(
     (event) {
-      if (event.data() == null) return [];
       return List<GradeToScale>.from(
         event.data()!['gradeToNumber'].map(
               (e) => GradeToScale.fromMap(e),
@@ -64,7 +65,7 @@ class GradeToScaleController extends _$GradeToScaleController {
     try {
       if (!state.hasValue) return left(Failure('No value'));
       fixLocalMap();
-      await _gradeToNumberRepository.updateValue(state.value!);
+      await _gradeToNumberRepository.updateValue(state.requireValue);
       return right(unit);
     } catch (e) {
       return left(Failure(e.toString()));
@@ -74,6 +75,12 @@ class GradeToScaleController extends _$GradeToScaleController {
   void updateLocalMap(int index, GradeToScale gradeToScale) {
     final newList = List<GradeToScale>.from(state.value!);
     newList[index] = gradeToScale;
+    // if gradeToScale got disabled notifty the semester controller to edit it's enteries
+    if (!gradeToScale.isEnabled) {
+      ref
+          .read(semesterControllerProvider.notifier)
+          .onDisableGrade(gradeToScale.map.keys.elementAt(0));
+    }
     state = AsyncValue.data(newList);
   }
 
@@ -91,6 +98,5 @@ class GradeToScaleController extends _$GradeToScaleController {
 
   Future<void> resetLocalMap(List<GradeToScale> list) async {
     state = AsyncValue.data(list);
-    // await _gradeToNumberRepository.reset(list);
   }
 }

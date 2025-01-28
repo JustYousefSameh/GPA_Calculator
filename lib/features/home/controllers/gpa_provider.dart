@@ -7,14 +7,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'gpa_provider.g.dart';
 
 @riverpod
-Future<double> semesterGPA(Ref ref, int semesterIndex) async {
-  final semesterList = ref.watch(semesterControllerProvider).value!;
+double semesterGPA(Ref ref, int semesterIndex) {
+  final semesterList = ref.watch(semesterControllerProvider).requireValue;
 
   if (semesterIndex >= semesterList.length) return 0;
   final courseList = semesterList[semesterIndex].courses;
 
-  ref.watch(semesterControllerProvider);
-  final gradeNumber = await ref.watch(gradeScaleMapProvider.future);
+  final gradeNumber = ref.watch(gradeScaleMapProvider).requireValue;
 
   double getTotalCredit(List<CourseModel> courseModelList) {
     double totalCredit = 0;

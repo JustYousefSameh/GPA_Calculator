@@ -13,23 +13,23 @@ appLifeCycleListener(Ref ref) {
       ref.watch(authStateChangeProvider).unwrapPrevious().valueOrNull;
 
   final semesterControllerNotifier =
-      ref.read(semesterControllerProvider.notifier);
+      ref.watch(semesterControllerProvider.notifier);
   final gradeToScaleControllerNotifier =
-      ref.read(gradeToScaleControllerProvider.notifier);
+      ref.watch(gradeToScaleControllerProvider.notifier);
 
-  Future<void> updateRemoteDatabase() async {
-    await semesterControllerNotifier.updateRemoteDatabase();
-    await gradeToScaleControllerNotifier.updateRemoteMap();
+  updateRemoteDatabase() {
+    semesterControllerNotifier.updateRemoteDatabase();
+    gradeToScaleControllerNotifier.updateRemoteMap();
   }
 
   return AppLifecycleListener(
-    onDetach: () async {
+    onDetach: () {
       if (isSignedIn == null) return;
-      await updateRemoteDatabase();
+      updateRemoteDatabase();
     },
-    onInactive: () async {
+    onInactive: () {
       if (isSignedIn == null) return;
-      await updateRemoteDatabase();
+      updateRemoteDatabase();
     },
   );
 }

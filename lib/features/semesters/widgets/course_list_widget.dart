@@ -6,39 +6,44 @@ import 'package:gpa_calculator/features/semesters/controller/semester_controller
 import 'package:gpa_calculator/features/semesters/widgets/course_widget.dart';
 import 'package:gpa_calculator/models/course_model.dart';
 
-class CourseList extends ConsumerWidget {
-  CourseList({
+class CourseList extends ConsumerStatefulWidget {
+  const CourseList({
     super.key,
     required this.semesterIndex,
   });
 
   final int semesterIndex;
 
+  @override
+  ConsumerState<CourseList> createState() => _CourseListState();
+}
+
+class _CourseListState extends ConsumerState<CourseList> {
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final coursesCount = ref.watch(semesterControllerProvider.select((value) {
-      // in case a semester is deleted the next rebuild would throw a range error
-      if (semesterIndex >= value.value!.length) {
-        return null;
-      }
-      return value.value![semesterIndex].courses.length;
-    }));
+  Widget build(BuildContext context) {
+    final semesters = ref.read(semesterControllerProvider).requireValue;
+    final courses = semesters[widget.semesterIndex].courses;
 
     return Column(
       children: [
         AnimatedList(
           key: listKey,
-          initialItemCount: coursesCount ?? 0,
+          initialItemCount: courses.length,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index, animation) {
+            final id = ref
+                .read(semesterControllerProvider)
+                .requireValue[widget.semesterIndex]
+                .courses[index]
+                .id;
             return SmoothSlideSize(
               animation: animation,
               child: CourseWidget(
-                key: UniqueKey(),
-                semesterIndex: semesterIndex,
+                key: ValueKey(id),
+                semesterIndex: widget.semesterIndex,
                 courseIndex: index,
               ),
             );
@@ -50,11 +55,10 @@ class CourseList extends ConsumerWidget {
           children: [
             AddCourseButton(
               listKey: listKey,
-              couresesCount: coursesCount ?? 0,
-              semesterIndex: semesterIndex,
+              semesterIndex: widget.semesterIndex,
             ),
             SemesterGPA(
-              semesterIndex: semesterIndex,
+              semesterIndex: widget.semesterIndex,
             ),
           ],
         ),
@@ -67,22 +71,26 @@ class AddCourseButton extends ConsumerWidget {
   const AddCourseButton({
     super.key,
     required this.listKey,
-    required this.couresesCount,
     required this.semesterIndex,
   });
 
   final GlobalKey<AnimatedListState> listKey;
-  final int couresesCount;
   final int semesterIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final coursesCount = ref
+        .watch(semesterControllerProvider)
+        .requireValue[semesterIndex]
+        .courses
+        .length;
+
     final controller = ref.read(semesterControllerProvider.notifier);
     return FilledButton.icon(
-      label: Text('Add Course'),
-      icon: Icon(Icons.add),
+      label: const Text('Add Course'),
+      icon: const Icon(Icons.add),
       onPressed: () {
-        listKey.currentState!.insertItem(couresesCount,
+        listKey.currentState!.insertItem(coursesCount,
             duration: const Duration(milliseconds: 600));
         controller.addCourse(semesterIndex);
       },
@@ -102,15 +110,8 @@ class SemesterGPA extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final courseList = passedCourseList ??
-    //     ref.watch(semesterControllerProvider).value![semesterIndex].courses;
     final gpaProvider = ref.watch(semesterGPAProvider(semesterIndex));
-    final double gpa = switch (gpaProvider) {
-      AsyncData(:final value) => value,
-      AsyncLoading(:final value) => value ?? 0,
-      AsyncError() => throw StateError("Can't calculate GPA"),
-      final v => throw StateError('what is $v'),
-    };
+
     return SizedBox(
       width: 150,
       height: 40,
@@ -128,7 +129,7 @@ class SemesterGPA extends ConsumerWidget {
                   ),
             ),
             Text(
-              '$gpa',
+              '$gpaProvider',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
                     fontSize: 20,

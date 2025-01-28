@@ -7,7 +7,7 @@ part of 'gradetoscale_controller.dart';
 // **************************************************************************
 
 String _$gradeToScaleStreamHash() =>
-    r'694dd5114ce1a7de7e44d62cbb8df66f67f3eb94';
+    r'9573434fd798d4ee720a584b94ea4c850ebae0ea';
 
 /// See also [gradeToScaleStream].
 @ProviderFor(gradeToScaleStream)
@@ -45,7 +45,7 @@ final gradeScaleMapProvider =
 // ignore: unused_element
 typedef GradeScaleMapRef = AutoDisposeFutureProviderRef<Map<String, dynamic>>;
 String _$gradeToScaleControllerHash() =>
-    r'2d2b12c6f8e495f4d2bd49b26eefcb199ce24431';
+    r'63b94d58d04c49d2349fc54eb12a23debe1c51fb';
 
 /// See also [GradeToScaleController].
 @ProviderFor(GradeToScaleController)

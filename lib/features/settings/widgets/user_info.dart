@@ -12,7 +12,6 @@ class UserInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userDocProvider);
-    if (user.value == null) return const SizedBox();
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -21,9 +20,11 @@ class UserInfo extends ConsumerWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 4,
+          top: 8,
+          bottom: 8,
         ),
         child: Row(
           children: [
@@ -34,7 +35,10 @@ class UserInfo extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(50),
                 child: user.value!.profilePic == ''
                     ? Image.asset("assets/images/profile.png")
-                    : CachedNetworkImage(imageUrl: user.value!.profilePic, fadeInDuration: Duration.zero,),
+                    : CachedNetworkImage(
+                        imageUrl: user.value!.profilePic,
+                        fadeInDuration: Duration.zero,
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -49,9 +53,10 @@ class UserInfo extends ConsumerWidget {
               ],
             ),
             const Spacer(),
-            GestureDetector(
-              onTap: () => ref.read(authControllerProvider.notifier).logout(),
-              child: const Icon(
+            IconButton(
+              onPressed: () =>
+                  ref.read(authControllerProvider.notifier).logout(),
+              icon: const Icon(
                 Icons.logout_outlined,
                 color: Color.fromARGB(255, 141, 141, 141),
                 size: 25,

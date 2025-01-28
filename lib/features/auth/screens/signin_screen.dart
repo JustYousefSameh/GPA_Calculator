@@ -117,12 +117,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         return null;
                                       },
                                       controller: emailTextController,
-                                      decoration: InputDecoration(
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 10),
-                                        suffixIcon:
-                                            const Icon(Icons.email_outlined),
+                                      decoration: const InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 10),
+                                        suffixIcon: Icon(Icons.email_outlined),
                                         // border: OutlineInputBorder(
                                         //   borderRadius: BorderRadius.circular(10),
                                         // ),
