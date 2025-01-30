@@ -61,6 +61,7 @@ class _GradeScaleWidgetState extends ConsumerState<GradeScaleWidget> {
     );
   }
 
+  //TODO : changes here should be handled as CourseWidget
   @override
   Widget build(BuildContext context) {
     gradeToScale = ref.watch(gradeToScaleControllerProvider

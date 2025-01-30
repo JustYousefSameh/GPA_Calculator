@@ -17,7 +17,6 @@ class AnimatedListTest extends StatelessWidget {
             return SizeTransition(
               sizeFactor: animation,
               child: AnimatedListItem(
-                 
                 index: index,
               ),
             );
@@ -58,7 +57,7 @@ class _AnimatedListItemState extends State<AnimatedListItem> {
                 );
               });
             },
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
           ),
         ],
       ),

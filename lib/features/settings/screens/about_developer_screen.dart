@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gpa_calculator/core/failure.dart';
@@ -16,8 +17,10 @@ class AboutDevloperScreen extends StatefulWidget {
 
 class _AboutDevloperScreenState extends State<AboutDevloperScreen>
     with SingleTickerProviderStateMixin {
-  final Size buttonSize = const Size(60, 60);
-  late final AnimationController animationController;
+  late final Map<String, dynamic> data;
+  late String textToShow;
+  late String profileUrl;
+  int selectedIndex = 0;
 
   Future<Map<String, dynamic>> getDeveloperInfo() async {
     var data = await http.get(
@@ -36,20 +39,36 @@ class _AboutDevloperScreenState extends State<AboutDevloperScreen>
     }
   }
 
-  void _launchMailClient(String targetEmail) async {
-    String mailUrl = 'mailto:$targetEmail';
+  String secondButtonText() {
+    if (selectedIndex == 0) return "Send mail";
+    return "Go to Profile";
+  }
+
+  void setSelected(int index) {
+    switch (index) {
+      case 0:
+        textToShow = data['mail']!;
+        profileUrl = data['mail']!;
+      case 1:
+        textToShow = data['github_username']!;
+        profileUrl = data['github']!;
+      case 2:
+        textToShow = data['linkedin_username']!;
+        profileUrl = data['linkedin']!;
+      case 3:
+        textToShow = data['discord_username']!;
+    }
+    selectedIndex = index;
+    setState(() {});
+  }
+
+  void _launchMailClient() async {
+    String mailUrl = 'mailto:${data['mail']!}';
     try {
       await launchUrlString(mailUrl);
     } catch (e) {
-      await Clipboard.setData(ClipboardData(text: targetEmail));
+      await Clipboard.setData(ClipboardData(text: data['mail']!));
     }
-  }
-
-  @override
-  void initState() {
-    animationController = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
-    super.initState();
   }
 
   @override
@@ -59,89 +78,220 @@ class _AboutDevloperScreenState extends State<AboutDevloperScreen>
       appBar: AppBar(),
       extendBodyBehindAppBar: true,
       body: FutureBuilder(
-        future: getDeveloperInfo()..then((_) => animationController.forward()),
+        future: getDeveloperInfo()
+          ..then((value) {
+            data = value;
+            textToShow = data['mail']!;
+            profileUrl = data['mail']!;
+          }),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SizedBox();
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Failed to load data"));
-          } else {
-            final data = snapshot.data!;
-            return SizedBox(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizeTransition(
-                      sizeFactor: CurvedAnimation(
-                        parent: animationController,
-                        curve: Curves.bounceOut,
+          if (!snapshot.hasData) return const SizedBox();
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedTextKit(
+                  isRepeatingAnimation: false,
+                  animatedTexts: [
+                    TypewriterAnimatedText(
+                      data['name']!,
+                      speed: const Duration(milliseconds: 100),
+                      textStyle: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Text(
-                        data["name"],
-                        style: const TextStyle(
-                          fontSize: 45,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      "Software enginner",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.grey,
-                        // fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Column(
-                      spacing: 8,
-                      children: [
-                        InfoCard(
-                          icon:
-                              Image.asset('assets/images/gmail.png', width: 40),
-                          text: data['mail'],
-                          function: () {
-                            _launchMailClient(data['mail']);
-                          },
-                        ),
-                        InfoCard(
-                            icon: Image.asset('assets/images/discord.png',
-                                width: 40),
-                            text: data['discord'],
-                            function: () async {
-                              await Clipboard.setData(
-                                  ClipboardData(text: data['discord']));
-                            }),
-                        InfoCard(
-                          icon: isDarkMode
-                              ? Image.asset('assets/images/github_dark.png',
-                                  width: 40)
-                              : Image.asset('assets/images/github_light.png',
-                                  width: 40),
-                          text: 'JustYousefSameh',
-                          function: () {
-                            launchUrl(Uri.parse(data['github']));
-                          },
-                        ),
-                        InfoCard(
-                          icon: Image.asset('assets/images/linkedin.png',
-                              width: 40),
-                          text: 'Yousef Sameh',
-                          function: () {
-                            launchUrl(Uri.parse(data['linkedin']));
-                          },
-                        ),
-                      ],
                     ),
                   ],
                 ),
-              ),
-            );
-          }
+                const Text(
+                  "Software enginner",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.grey,
+                    // fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  spacing: 8,
+                  children: [
+                    SocialWidget(
+                      imagePath: "assets/images/gmail.png",
+                      isSelected: selectedIndex == 0,
+                      function: () {
+                        setSelected(0);
+                      },
+                    ),
+                    SocialWidget(
+                      imagePath: isDarkMode
+                          ? "assets/images/github_dark.png"
+                          : "assets/images/github_light.png",
+                      isSelected: selectedIndex == 1,
+                      function: () {
+                        setSelected(1);
+                      },
+                    ),
+                    SocialWidget(
+                      imagePath: "assets/images/linkedin.png",
+                      isSelected: selectedIndex == 2,
+                      function: () {
+                        setSelected(2);
+                      },
+                    ),
+                    SocialWidget(
+                      imagePath: "assets/images/discord.png",
+                      isSelected: selectedIndex == 3,
+                      function: () {
+                        setSelected(3);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: Material(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        textToShow,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: textToShow));
+                        },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: const BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                        child: const Text("Copy"),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton(
+                        onPressed: selectedIndex == 3
+                            ? null
+                            : () {
+                                if (selectedIndex == 0) {
+                                  _launchMailClient();
+                                } else {
+                                  launchUrl(
+                                    Uri.parse(profileUrl),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                }
+                              },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: const BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                        child: Text(
+                          secondButtonText(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
         },
+      ),
+    );
+  }
+}
+
+class SocialWidget extends StatefulWidget {
+  const SocialWidget(
+      {super.key,
+      required this.imagePath,
+      required this.function,
+      required this.isSelected});
+
+  final String imagePath;
+  final bool isSelected;
+  final VoidCallback function;
+
+  @override
+  State<SocialWidget> createState() => _SocialWidgetState();
+}
+
+class _SocialWidgetState extends State<SocialWidget>
+    with SingleTickerProviderStateMixin {
+  late final animationController = AnimationController(
+    duration: const Duration(milliseconds: 200),
+    vsync: this,
+  );
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 1, end: 1.05).animate(
+          CurvedAnimation(
+            parent: animationController,
+            curve: Curves.ease,
+          ),
+        ),
+        child: SlideTransition(
+          position: Tween<Offset>(
+                  begin: const Offset(0, 0), end: const Offset(0, -0.2))
+              .animate(
+            CurvedAnimation(
+              parent: animationController,
+              curve: Curves.ease,
+            ),
+          ),
+          child: TextButton(
+            style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: const BorderSide(color: Colors.grey),
+                ),
+                backgroundColor: widget.isSelected
+                    ? Theme.of(context).colorScheme.surfaceContainer
+                    : null),
+            onPressed: () {
+              animationController.forward().whenComplete(() {
+                animationController.reverse();
+              });
+              widget.function();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Image.asset(widget.imagePath),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -153,32 +303,40 @@ class InfoCard extends StatelessWidget {
     required this.icon,
     required this.text,
     required this.function,
+    required this.animaton,
   });
 
   final Image icon;
   final String text;
   final void Function() function;
+  final Animation<double> animaton;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          alignment: Alignment.centerLeft,
-          foregroundColor: Theme.of(context).textTheme.labelMedium!.color,
-        ),
-        onPressed: function,
-        child: Row(
-          spacing: 12,
-          children: [
-            icon,
-            Text(
-              text,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-            ),
-          ],
+    return SlideTransition(
+      position:
+          Tween<Offset>(begin: const Offset(-1.2, 0), end: const Offset(0, 0))
+              .animate(animaton),
+      child: SizedBox(
+        height: 50,
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            alignment: Alignment.centerLeft,
+            foregroundColor: Theme.of(context).textTheme.labelMedium!.color,
+          ),
+          onPressed: function,
+          child: Row(
+            spacing: 12,
+            children: [
+              icon,
+              Text(
+                text,
+                style:
+                    const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ),
       ),
     );

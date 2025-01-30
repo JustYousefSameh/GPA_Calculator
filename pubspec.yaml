@@ -1,9 +1,9 @@
 name: gpa_calculator
-description: A new Flutter project.
+description: Simple to use GPA Calculator.
 
-publish_to: 'none' 
+publish_to: 'none'
 
-version: 1.0.1+4
+version: 1.0.1+6
 
 environment:
   sdk: ^3.0.0
@@ -33,6 +33,7 @@ dependencies:
   riverpod_annotation: ^2.6.1
   url_launcher: ^6.3.1
   http: ^1.2.2
+  animated_text_kit: ^4.2.3
 
 dev_dependencies:
   flutter_lints: ^5.0.0

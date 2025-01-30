@@ -42,7 +42,6 @@ class _SemesterListViewState extends ConsumerState<SemesterListView>
           return;
         }
 
-        print("Interent dataa");
         showGeneralDialog(
           context: context,
           transitionBuilder: (ctx, a1, a2, child) {

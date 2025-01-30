@@ -90,132 +90,123 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
-                    // const Divider(thickness: 2, height: 2),
                     const Spacer(),
-                    Row(
-                      children: [
-                        SizedBox(
-                          child: TextButton.icon(
-                            onPressed: () {
-                              showGeneralDialog<String>(
-                                context: context,
-                                transitionBuilder: (ctx, a1, a2, child) {
-                                  return FadeTransition(
-                                    opacity: CurvedAnimation(
+                    SizedBox(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          showGeneralDialog<String>(
+                            context: context,
+                            transitionBuilder: (ctx, a1, a2, child) {
+                              return FadeTransition(
+                                opacity: CurvedAnimation(
+                                    parent: a1, curve: Curves.ease),
+                                child: ScaleTransition(
+                                  scale: Tween(begin: 0.2, end: 1.0).animate(
+                                    CurvedAnimation(
                                         parent: a1, curve: Curves.ease),
-                                    child: ScaleTransition(
-                                      scale:
-                                          Tween(begin: 0.2, end: 1.0).animate(
-                                        CurvedAnimation(
-                                            parent: a1, curve: Curves.ease),
-                                      ),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                transitionDuration:
-                                    const Duration(milliseconds: 300),
-                                pageBuilder: (newContext, a1, a2) =>
-                                    AlertDialog(
-                                  title: const Text("Delete Account"),
-                                  content: Text(
-                                    "Deleting your account will remove all your data from the cloud. This action cannot be undone.",
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context, "Cancel");
-                                        },
-                                        child: const Text("Cancel")),
-                                    TextButton(
-                                      onPressed: () async {
-                                        //TODO: find a better way to do this. Probably need to rewrite authController
-                                        final type = await authNotifier
-                                            .determineAccountType();
-
-                                        if (type == "google.com") {
-                                          Navigator.pop(context, "google");
-                                        } else if (type == "password") {
-                                          Navigator.pop(context, "password");
-                                        }
-                                      },
-                                      child: Text(
-                                        "Delete",
-                                        style: TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .error,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                  child: child,
                                 ),
-                              ).then((value) async {
-                                if (value == "google") {
-                                  setState(() {
-                                    isLoading = true;
-                                  });
-
-                                  final successOfFailure = await authNotifier
-                                      .deleteGoogleAccount(context);
-                                  successOfFailure.fold(
-                                    (l) {
-                                      showErrorSnackBar(context, l.message);
-                                      setState(() {
-                                        isLoading = false;
-                                      });
+                              );
+                            },
+                            transitionDuration:
+                                const Duration(milliseconds: 300),
+                            pageBuilder: (newContext, a1, a2) => AlertDialog(
+                              title: const Text("Delete Account"),
+                              content: Text(
+                                "Deleting your account will remove all your data from the cloud. This action cannot be undone.",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, "Cancel");
                                     },
-                                    (r) {},
-                                  );
-                                } else if (value == "password") {
-                                  showPasswordDialoug(context, (value) {
-                                    setState(() {
-                                      isLoading = value;
-                                    });
-                                  }).then((value) {
-                                    if (value == "Cancel") {
-                                      setState(() {
-                                        isLoading = false;
-                                      });
+                                    child: const Text("Cancel")),
+                                TextButton(
+                                  onPressed: () async {
+                                    //TODO: find a better way to do this. Probably need to rewrite authController
+                                    final type = await authNotifier
+                                        .determineAccountType();
+
+                                    if (type == "google.com") {
+                                      Navigator.pop(context, "google");
+                                    } else if (type == "password") {
+                                      Navigator.pop(context, "password");
                                     }
+                                  },
+                                  child: Text(
+                                    "Delete",
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ).then((value) async {
+                            if (value == "google") {
+                              setState(() {
+                                isLoading = true;
+                              });
+
+                              final successOfFailure = await authNotifier
+                                  .deleteGoogleAccount(context);
+                              successOfFailure.fold(
+                                (l) {
+                                  showErrorSnackBar(context, l.message);
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                },
+                                (r) {},
+                              );
+                            } else if (value == "password") {
+                              showPasswordDialoug(context, (value) {
+                                setState(() {
+                                  isLoading = value;
+                                });
+                              }).then((value) {
+                                if (value == "Cancel") {
+                                  setState(() {
+                                    isLoading = false;
                                   });
                                 }
                               });
-                            },
-                            icon: Icon(
-                              Icons.delete_forever,
-                              size: 25,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            label: Text(
-                              "Delete Account",
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.error,
-                                fontSize: 20,
-                              ),
-                            ),
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          Icons.delete_forever,
+                          size: 25,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        label: Text(
+                          "Delete Account",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 20,
                           ),
                         ),
-                        SizedBox(
-                          child: TextButton.icon(
-                            onPressed: () {
-                              context.push('/settings/aboutdeveloper');
-                            },
-                            icon: const Icon(
-                              Icons.info_outline_rounded,
-                              size: 25,
-                            ),
-                            label: const Text(
-                              "Developer",
-                              style: TextStyle(
-                                fontSize: 20,
-                              ),
-                            ),
+                      ),
+                    ),
+                    SizedBox(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          context.push('/settings/aboutdeveloper');
+                        },
+                        label: const Text(
+                          "About Developer",
+                          style: TextStyle(
+                            fontSize: 20,
                           ),
                         ),
-                      ],
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          size: 25,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -366,7 +357,7 @@ class _PasswordAlertState extends ConsumerState<PasswordAlert> {
                           showErrorSnackBar(context, l.message);
                           Navigator.pop(context, "Cancel");
                         },
-                        (r) => Navigator.pop(context, "Success"),
+                        (r) => null,
                       );
                     } else {
                       setState(() {

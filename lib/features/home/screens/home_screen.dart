@@ -87,7 +87,6 @@ class _InitilizationState extends ConsumerState<Initilization> {
         semesterController.hasValue &&
         user.hasValue &&
         gradeScaleMap.hasValue) {
-      print("Render child");
       return widget.child;
     } else if (semesterStream.hasError ||
         gpa.hasError ||
