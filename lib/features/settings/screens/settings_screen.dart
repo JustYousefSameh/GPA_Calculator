@@ -145,37 +145,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                               ],
                             ),
-                          ).then((value) async {
-                            if (value == "google") {
-                              setState(() {
-                                isLoading = true;
-                              });
-
-                              final successOfFailure = await authNotifier
-                                  .deleteGoogleAccount(context);
-                              successOfFailure.fold(
-                                (l) {
-                                  showErrorSnackBar(context, l.message);
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                },
-                                (r) {},
-                              );
-                            } else if (value == "password") {
-                              showPasswordDialoug(context, (value) {
+                          ).then(
+                            (value) async {
+                              if (value == "google") {
                                 setState(() {
-                                  isLoading = value;
+                                  isLoading = true;
                                 });
-                              }).then((value) {
-                                if (value == "Cancel") {
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                }
-                              });
-                            }
-                          });
+
+                                final successOfFailure = await authNotifier
+                                    .deleteGoogleAccount(context);
+                                successOfFailure.fold(
+                                  (l) {
+                                    showErrorSnackBar(context, l.message);
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  },
+                                  (r) {},
+                                );
+                              } else if (value == "password") {
+                                showPasswordDialoug(
+                                  context,
+                                  (value) {
+                                    setState(() {});
+                                    isLoading = value;
+                                  },
+                                );
+                              }
+                            },
+                          );
                         },
                         icon: Icon(
                           Icons.delete_forever,
@@ -346,19 +344,22 @@ class _PasswordAlertState extends ConsumerState<PasswordAlert> {
 
                     if (_formKey.currentState!.validate()) {
                       widget.updateLoading(true);
-                      final successOrFailure = await ref
+                      Navigator.pop(context);
+                      ref
                           .watch(authControllerProvider.notifier)
                           .deletePasswordAccount(
                               context,
                               emailTextController.text,
-                              passwordTextController.text);
-                      successOrFailure.fold(
-                        (l) {
-                          showErrorSnackBar(context, l.message);
-                          Navigator.pop(context, "Cancel");
-                        },
-                        (r) => null,
-                      );
+                              passwordTextController.text)
+                          .then((value) {
+                        value.fold(
+                          (l) {
+                            widget.updateLoading(false);
+                            showErrorSnackBar(context, l.message);
+                          },
+                          (r) => null,
+                        );
+                      });
                     } else {
                       setState(() {
                         validationMode = AutovalidateMode.always;

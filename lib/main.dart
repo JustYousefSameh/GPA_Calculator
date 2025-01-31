@@ -4,7 +4,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpa_calculator/core/theme_provider.dart';
 import 'package:gpa_calculator/firebase_options.dart';
-import 'package:gpa_calculator/router_provider.dart';
+import 'package:gpa_calculator/router/router_provider.dart';
 import 'package:gpa_calculator/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

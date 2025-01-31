@@ -45,7 +45,7 @@ final gradeScaleMapProvider =
 // ignore: unused_element
 typedef GradeScaleMapRef = AutoDisposeFutureProviderRef<Map<String, dynamic>>;
 String _$gradeToScaleControllerHash() =>
-    r'63b94d58d04c49d2349fc54eb12a23debe1c51fb';
+    r'39c299ea606a4ec0b236a91fea0572a0bff21361';
 
 /// See also [GradeToScaleController].
 @ProviderFor(GradeToScaleController)

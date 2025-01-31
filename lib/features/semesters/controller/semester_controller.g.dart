@@ -25,7 +25,7 @@ final semesterStreamProvider =
 // ignore: unused_element
 typedef SemesterStreamRef = AutoDisposeStreamProviderRef<List<SemsesterModel>>;
 String _$semesterControllerHash() =>
-    r'17fa9d7452d06b2fea01c7f68cdd3fa3dc8efa23';
+    r'49fee0c92f061fb7fdf41a54382b53ffdf82fa5c';
 
 /// See also [SemesterController].
 @ProviderFor(SemesterController)
