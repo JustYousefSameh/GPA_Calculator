@@ -43,6 +43,7 @@ class RouterNotifier extends _$RouterNotifier implements Listenable {
     if (isAuth == true) {
       if (state.uri.toString() == '/login' ||
           state.uri.toString() == '/signup' ||
+          state.uri.toString() == '/splash' ||
           state.uri.toString() == '/forgotpassword') {
         return '/';
       }
