@@ -22,5 +22,6 @@
 - Presets of user-defined custom grading scales.
 - Ability to rename semesters.
 - Use old cumlative GPA and Credits Hours and base calculation upon them.
+- Ability to Undo deleteing Course or Semester.
 
 
